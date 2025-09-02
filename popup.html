@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>JSON Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h3>输入 JSON</h3>
+<textarea id="input" placeholder="粘贴 JSON 字符串…"></textarea>
+<div style="display: flex; gap: 8px; margin-top: 8px;">
+  <button id="render" style="display: none">渲染</button>
+  <button id="renderNewWindow">渲染(窗口)</button>
+</div>
+<div id="tree"></div>
+
+<div id="floatLayer" class="float-layer hidden">
+  <div class="float-header">
+    <span id="floatPath"></span>
+    <button id="closeFloat">×</button>
+  </div>
+  <div id="floatBody"></div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
