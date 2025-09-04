@@ -7,7 +7,7 @@
     "default_popup": "popup.html",
     "default_icon": "icon.png"
   },
-  "permissions": ["clipboardWrite", "tabs"],
+  "permissions": ["clipboardWrite"],
   "icons": {
     "128": "icon.png"
   }
