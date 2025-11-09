@@ -135,15 +135,14 @@ textarea {
     background: #28a745;
 }
 
-.key-container {
-    display: inline-block;
-    margin-bottom: 2px;
-}
-
-.value-container {
+.key-container, .value-container {
     display: flex;
     align-items: flex-start;
     position: relative;
+}
+
+.expandable-key {
+    cursor: pointer;
 }
 
 .float-layer {
@@ -286,7 +285,7 @@ textarea {
     font-style: italic;
 }
 
-.sub-json {
+.sub-json, .sub-xml {
     border-left: 2px solid #0078d4;
     padding-left: 8px;
     margin-top: 4px;
@@ -306,4 +305,18 @@ textarea {
 .node[data-depth="8"]::before {
     background: #f44336;
     width: 2px;
+}
+
+.end-symbol {
+    color: #881391;
+    font-weight: 600;
+    margin-left: 16px;
+}
+
+/* 复制按钮样式 */
+.copy-button {
+    margin: 0 5px;
+    cursor: pointer;
+    color: #0078d4;
+    user-select: none;
 }

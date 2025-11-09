@@ -17,8 +17,8 @@ try {
     // 动态宽度
     document.body.style.width = Math.max(420, getMaxValueLength(obj) * 8 + 100) + 'px';
 
-    const renderNode = createRenderNode(createJSONStringExpander(true));
-    document.getElementById('tree').appendChild(renderNode(obj, parentPath));
+    const renderNode = createRenderNode(createJSONStringExpander(true), createXMLStringExpander(true), true);
+    document.getElementById('tree').appendChild(renderNode(obj, parentPath, 0, true));
 } catch (e) {
     document.body.textContent = '解析失败：' + e.message;
 }
