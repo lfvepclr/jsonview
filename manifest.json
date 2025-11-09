@@ -4,7 +4,7 @@
   "description": "Pretty-print JSON and recursively open stringified JSON",
   "version": "1.0",
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "index.html",
     "default_icon": "icon.png"
   },
   "permissions": ["clipboardWrite"],
