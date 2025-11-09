@@ -1,6 +1,14 @@
 export { default as RenderNode } from './RenderNode';
-export { default as ContainerNode } from './ContainerNode';
-export { default as LeafNode } from './LeafNode';
-export { default as JsonStringNode } from './JsonStringNode';
-export { default as XmlStringNode } from './XmlStringNode';
-export { default as XmlRenderer } from './XmlRenderer';
+export { default as XMLNode } from './XMLNode';
+export { default as StringNode } from './StringNode';
+
+export {
+    ImageFloat,
+    URLActionButton
+} from './ReactComponents';
+
+export {
+    XMLStringExpander,
+    JSONStringExpander,
+    EmbeddedJSON
+} from './ExpanderComponents';

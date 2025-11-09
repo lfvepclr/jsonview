@@ -12,9 +12,9 @@
  */
 import React, {useCallback, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import { RenderNode } from './core';
+import RenderNode from './core/RenderNode';
 import '../styles.css';
-import { FloatData, JSONValue } from './types';
+import {FloatData, JSONValue} from './types';
 
 /**
  * Popup 组件
@@ -43,13 +43,42 @@ const Popup: React.FC = () => {
      * 解析输入的 JSON 字符串并渲染结果
      */
     const handleRender = useCallback(() => {
+        const trimmedInput = inputValue.trim();
+
+        // 首先尝试解析为 JSON
         try {
-            const obj = JSON.parse(inputValue.trim());
+            const obj = JSON.parse(trimmedInput);
             setTreeData(obj);
             setError(null);
+            return;
         } catch (e) {
-            setError((e as Error).message);
+            // JSON 解析失败，继续尝试其他格式
         }
+
+        // 检查是否为 XML
+        if (trimmedInput.startsWith('<') && trimmedInput.endsWith('>')) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
+
+                // 检查解析错误
+                const parserError = xmlDoc.querySelector('parsererror');
+                if (parserError) {
+                    throw new Error(parserError.textContent || 'XML 解析错误');
+                }
+
+                // 如果成功解析为 XML，将其作为字符串传递给渲染器
+                setTreeData(trimmedInput);
+                setError(null);
+                return;
+            } catch (e) {
+                setError((e as Error).message);
+                return;
+            }
+        }
+
+        // 如果既不是有效的 JSON 也不是有效的 XML
+        setError('输入既不是有效的 JSON 也不是有效的 XML');
     }, [inputValue]);
 
     /**
@@ -58,13 +87,40 @@ const Popup: React.FC = () => {
      * 在新窗口中打开详细视图
      */
     const handleRenderNewWindow = useCallback(() => {
+        const trimmedInput = inputValue.trim();
+
+        // 首先尝试解析为 JSON
         try {
-            const jsonStr = inputValue.trim();
-            JSON.parse(jsonStr); // 验证
-            window.open(`viewer.html?json=${encodeURIComponent(jsonStr)}&path=${encodeURIComponent('$')}`, '_blank');
+            JSON.parse(trimmedInput); // 验证
+            window.open(`viewer.html?json=${encodeURIComponent(trimmedInput)}&path=${encodeURIComponent('$')}`, '_blank');
+            return;
         } catch (e) {
-            alert('JSON解析错误: ' + (e as Error).message);
+            // JSON 解析失败，继续尝试其他格式
         }
+
+        // 检查是否为 XML
+        if (trimmedInput.startsWith('<') && trimmedInput.endsWith('>')) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
+
+                // 检查解析错误
+                const parserError = xmlDoc.querySelector('parsererror');
+                if (parserError) {
+                    throw new Error(parserError.textContent || 'XML 解析错误');
+                }
+
+                // 如果成功解析为 XML，传递给查看器
+                window.open(`viewer.html?json=${encodeURIComponent(JSON.stringify(trimmedInput))}&path=${encodeURIComponent('$')}`, '_blank');
+                return;
+            } catch (e) {
+                alert('XML解析错误: ' + (e as Error).message);
+                return;
+            }
+        }
+
+        // 如果既不是有效的 JSON 也不是有效的 XML
+        alert('输入既不是有效的 JSON 也不是有效的 XML');
     }, [inputValue]);
 
     /**
@@ -126,7 +182,7 @@ const Popup: React.FC = () => {
                         {floatData.type === 'json' ? (
                             <pre>{JSON.stringify(floatData.data, null, 2)}</pre>
                         ) : (
-                            <div>XML内容</div>
+                            <pre>{floatData.data}</pre>
                         )}
                     </div>
                 </div>

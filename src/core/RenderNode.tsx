@@ -3,8 +3,8 @@ import {JSONValue} from '../types';
 import {looksLikeJSON, looksLikeXML} from '../utils';
 import LeafNode from './LeafNode';
 import ContainerNode from './ContainerNode';
-import JsonStringNode from './JsonStringNode';
-import XmlStringNode from './XmlStringNode';
+import StringNode from './StringNode';
+import XMLNode from './XMLNode';
 
 /**
  * RenderNode 组件 - JSON/XML 数据渲染器的主入口组件
@@ -73,10 +73,10 @@ const RenderNode: React.FC<RenderNodeProps> = ({
 
     // 处理叶子节点
     if (data === null || typeof data !== 'object') {
-        // 特殊处理 JSON 字符串
-        if (typeof data === 'string' && looksLikeJSON(data)) {
+        // 特殊处理 JSON 或 XML 字符串
+        if (typeof data === 'string' && (looksLikeJSON(data) || looksLikeXML(data))) {
             return (
-                <JsonStringNode
+                <StringNode
                     data={data}
                     path={path}
                     depth={depth}
@@ -86,17 +86,28 @@ const RenderNode: React.FC<RenderNodeProps> = ({
             );
         }
 
-        // 特殊处理 XML 字符串
-        if (typeof data === 'string' && looksLikeXML(data)) {
-            return (
-                <XmlStringNode
-                    data={data}
-                    path={path}
-                    depth={depth}
-                    onExpand={onExpand}
-                    renderSubNode={renderSubNode}
-                />
-            );
+        // 处理纯 XML 数据
+        if (typeof data === 'string' && data.trim().startsWith('<') && data.trim().endsWith('>')) {
+            // 尝试解析为 XML
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data, "text/xml");
+                // 检查解析错误
+                const parserError = xmlDoc.querySelector('parsererror');
+                if (!parserError) {
+                    return (
+                        <XMLNode
+                            data={data}
+                            path={path}
+                            depth={depth}
+                            onExpand={onExpand}
+                            renderSubNode={renderSubNode}
+                        />
+                    );
+                }
+            } catch (e) {
+                // 如果解析失败，继续按普通字符串处理
+            }
         }
 
         // 处理普通叶子节点

@@ -1,5 +1,4 @@
 import React from 'react';
-import {JSONValue} from '../types/jsonTypes';
 
 /**
  * XmlRenderer 组件 - XML 数据渲染器

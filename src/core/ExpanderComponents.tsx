@@ -3,9 +3,9 @@
  *
  * 包含用于处理 JSON 和 XML 字符串展开的 React 组件
  */
-import React, { useState } from 'react';
-import { looksLikeJSON, looksLikeXML } from '../../utils/helperUtils';
-import { XMLNode } from './XMLNode';
+import React, {useState} from 'react';
+import {looksLikeJSON, looksLikeXML} from '../utils/helperUtils';
+import XMLNode from './XMLNode';
 
 interface XMLStringExpanderProps {
     value: string;
@@ -23,23 +23,23 @@ interface JSONStringExpanderProps {
 /**
  * 内嵌 JSON 渲染组件
  */
-export const EmbeddedJSON: React.FC<{ content: string }> = ({ content }) => {
+export const EmbeddedJSON: React.FC<{ content: string }> = ({content}) => {
     try {
         const jsonObj = JSON.parse(content);
         return (
             <div className="sub-json"
-                 style={{ margin: '8px 0 8px 20px', border: '1px solid #ddd', padding: '8px', background: '#f9f9f9' }}>
-                <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace' }}>
+                 style={{margin: '8px 0 8px 20px', border: '1px solid #ddd', padding: '8px', background: '#f9f9f9'}}>
+                <div style={{fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace'}}>
                     内嵌JSON:
                 </div>
-                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                <pre style={{margin: 0, whiteSpace: 'pre-wrap'}}>
           {JSON.stringify(jsonObj, null, 2)}
         </pre>
             </div>
         );
     } catch (e) {
         return (
-            <div style={{ marginLeft: '16px' }}>
+            <div style={{marginLeft: '16px'}}>
                 <span className="str">{content}</span>
             </div>
         );
@@ -52,11 +52,11 @@ export const EmbeddedJSON: React.FC<{ content: string }> = ({ content }) => {
  * React 组件处理 XML 字符串的展开
  */
 export const XMLStringExpander: React.FC<XMLStringExpanderProps> = ({
-    value,
-    path,
-    onExpand
-}) => {
-    const [isVisible, setIsVisible] = useState(false);
+                                                                        value,
+                                                                        path,
+                                                                        onExpand
+                                                                    }) => {
+    const [isVisible, setIsVisible] = useState(true);
 
     if (typeof value !== 'string' || !looksLikeXML(value)) {
         return null;
@@ -87,15 +87,6 @@ export const XMLStringExpander: React.FC<XMLStringExpanderProps> = ({
         parseError = e as Error;
     }
 
-    // 检查 CDATA 中的 JSON
-    let jsonInCDATA: string | null = null;
-    if (value) {
-        const match = value.match(/<!\[CDATA\[(\{.*?\})\]\]>/);
-        if (match) {
-            jsonInCDATA = match[1];
-        }
-    }
-
     return (
         <>
         <span
@@ -113,23 +104,29 @@ export const XMLStringExpander: React.FC<XMLStringExpanderProps> = ({
                     padding: '8px',
                     background: '#f9f9f9'
                 }}>
-                    <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace' }}>
+                    <div style={{fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace'}}>
                         子XML完整路径: {path}
                     </div>
                     {parseError ? (
                         <div>XML 解析错误: {parseError.message}</div>
                     ) : xmlDoc ? (
-                        <>
-                            <XMLNode node={xmlDoc.documentElement} />
-                            {jsonInCDATA && <EmbeddedJSON content={jsonInCDATA} />}
-                        </>
+                        <XMLNode 
+                            data={value}
+                            path={path}
+                            depth={0}
+                            renderSubNode={(data, _path, _depth) => (
+                                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                                    {JSON.stringify(data, null, 2)}
+                                </pre>
+                            )}
+                        />
                     ) : null}
                 </div>
             )}
             <button
                 className="copyBtn"
                 onClick={handleFloatExpand}
-                style={{ marginLeft: '4px' }}
+                style={{marginLeft: '4px'}}
             >
                 📄
             </button>
@@ -143,12 +140,12 @@ export const XMLStringExpander: React.FC<XMLStringExpanderProps> = ({
  * React 组件处理 JSON 字符串的展开
  */
 export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
-    value,
-    path,
-    onExpand,
-    renderSubNode
-}) => {
-    const [isVisible, setIsVisible] = useState(false);
+                                                                          value,
+                                                                          path,
+                                                                          onExpand,
+                                                                          renderSubNode
+                                                                      }) => {
+    const [isVisible, setIsVisible] = useState(true);
 
     if (typeof value !== 'string' || !looksLikeJSON(value)) {
         return null;
@@ -159,35 +156,33 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
 
     // 递归修复转义字符的函数
     const fixEscapedCharacters = (str: string): string => {
-        // 先处理最外层的转义
-        if (str.startsWith('\"') && str.endsWith('\"')) {
+        let fixedStr = str;
+        
+        // 逐步处理各种转义
+        // 处理最外层的引号包裹
+        if (fixedStr.startsWith('"') && fixedStr.endsWith('"')) {
             try {
-                str = JSON.parse(str);
+                // 尝试解析最外层引号
+                fixedStr = JSON.parse(fixedStr);
             } catch (e) {
-                // 如果失败，继续下面的处理
+                // 如果失败，继续处理内部转义
             }
         }
         
-        let fixedStr = str;
-        let previousStr: string;
-        
-        // 循环处理直到没有更多转义字符需要修复
-        do {
-            previousStr = fixedStr;
-            // 处理HTML实体
-            fixedStr = fixedStr.replace(/&quot;/g, '"')
-                .replace(/&apos;/g, "'")
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&amp;/g, '&');
-            // 处理双重转义的引号
-            fixedStr = fixedStr.replace(/\\\\"/g, '"')
-                .replace(/\\\\'/g, "'");
-        } while (fixedStr !== previousStr);
+        // 处理多层转义，从最外层开始
+        fixedStr = fixedStr
+            .replace(/\\\\\\\\"/g, '\\\\"')  // 四个反斜杠+引号 -> 两个反斜杠+引号
+            .replace(/\\\\"/g, '"')         // 两个反斜杠+引号 -> 引号
+            .replace(/\\\"/g, '"')           // 一个反斜杠+引号 -> 引号
+            .replace(/&quot;/g, '"')          // HTML实体
+            .replace(/&apos;/g, "'")          // HTML实体
+            .replace(/&lt;/g, '<')             // HTML实体
+            .replace(/&gt;/g, '>')             // HTML实体
+            .replace(/&amp;/g, '&');           // HTML实体
         
         return fixedStr;
     };
-    
+
     try {
         jsonObj = JSON.parse(value);
     } catch (e) {
@@ -208,7 +203,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                 let step2 = step1.replace(/\\\\n/g, "\\n"); // 处理换行符
                 let step3 = step2.replace(/\\\\r/g, "\\r"); // 处理回车符
                 let step4 = step3.replace(/\\\\t/g, "\\t"); // 处理制表符
-                
+
                 jsonObj = JSON.parse(step4);
                 parseError = null;
             } catch (e2) {
@@ -218,7 +213,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                     let fixedValue = value.replace(/<!\[CDATA\[/g, '<![CDATA[')
                         .replace(/\]\]>/g, ']]>')
                         .replace(/\\"/g, '"');  // 修复转义引号
-                    
+
                     jsonObj = JSON.parse(fixedValue);
                     parseError = null;
                 } catch (e3) {
@@ -230,7 +225,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                             .replace(/\\\\"/g, '"')           // 修复双重转义引号
                             .replace(/\\\\\\"/g, '"')         // 修复三重转义引号
                             .replace(/\\\\\\\\"/g, '"');      // 修复四重转义引号
-                        
+
                         jsonObj = JSON.parse(processed);
                         parseError = null;
                     } catch (e4) {
@@ -253,7 +248,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                                     fixedValue = fixedValue.replace(fullMatch, `<![CDATA[${fixedJson}]]>`);
                                 }
                             }
-                            
+
                             jsonObj = JSON.parse(fixedValue);
                             parseError = null;
                         } catch (e5) {
@@ -292,7 +287,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                     padding: '8px',
                     background: '#f9f9f9'
                 }}>
-                    <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace' }}>
+                    <div style={{fontSize: '11px', color: '#666', marginBottom: '4px', fontFamily: 'monospace'}}>
                         子JSON完整路径: {path}
                     </div>
                     {parseError ? (
@@ -301,7 +296,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
                         renderSubNode ? (
                             renderSubNode(jsonObj, path, 0)
                         ) : (
-                            <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                            <pre style={{margin: 0, whiteSpace: 'pre-wrap'}}>
                   {JSON.stringify(jsonObj, null, 2)}
                 </pre>
                         )
@@ -311,7 +306,7 @@ export const JSONStringExpander: React.FC<JSONStringExpanderProps> = ({
             <button
                 className="copyBtn"
                 onClick={handleFloatExpand}
-                style={{ marginLeft: '4px' }}
+                style={{marginLeft: '4px'}}
             >
                 📄
             </button>

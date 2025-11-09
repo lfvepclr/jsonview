@@ -126,4 +126,4 @@ export const URLActionButton: React.FC<URLActionButtonProps> = ({value, onImageP
 };
 
 // 从单独的文件导入展开组件
-export { XMLStringExpander, JSONStringExpander, EmbeddedJSON } from './ExpanderComponents';
+export {XMLStringExpander, JSONStringExpander, EmbeddedJSON} from './ExpanderComponents';

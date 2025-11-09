@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {createContext, ReactNode, useContext, useState} from 'react';
 
 interface ExpandContextType {
     expandedPaths: Set<string>;
@@ -8,7 +8,7 @@ interface ExpandContextType {
 
 const ExpandContext = createContext<ExpandContextType | undefined>(undefined);
 
-export const ExpandProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ExpandProvider: React.FC<{ children: ReactNode }> = ({children}) => {
     const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
     const togglePath = (path: string) => {
@@ -28,7 +28,7 @@ export const ExpandProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     };
 
     return (
-        <ExpandContext.Provider value={{ expandedPaths, togglePath, isPathExpanded }}>
+        <ExpandContext.Provider value={{expandedPaths, togglePath, isPathExpanded}}>
             {children}
         </ExpandContext.Provider>
     );

@@ -30,7 +30,7 @@ export const smoothScrollTo = (element: HTMLElement, offset: number = 0): void =
     const rect = element.getBoundingClientRect();
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
     const targetPosition = rect.top + scrollTop - offset;
-    
+
     window.scrollTo({
         top: targetPosition,
         behavior: 'smooth'
@@ -67,7 +67,7 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
  * @param mimeType - MIME 类型
  */
 export const downloadFile = (filename: string, content: string, mimeType: string = 'text/plain'): void => {
-    const blob = new Blob([content], { type: mimeType });
+    const blob = new Blob([content], {type: mimeType});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

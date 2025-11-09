@@ -33,6 +33,7 @@ export const classOf = (v: any): string => {
  * @returns 如果字符串看起来像 JSON 则返回 true，否则返回 false
  */
 export const looksLikeJSON = (str: string): boolean => {
+    if (typeof str !== 'string') return false;
     str = str.trim();
     return (str.startsWith('{') && str.endsWith('}')) || (str.startsWith('[') && str.endsWith(']'));
 };
@@ -46,6 +47,7 @@ export const looksLikeJSON = (str: string): boolean => {
  * @returns 如果字符串看起来像 XML 则返回 true，否则返回 false
  */
 export const looksLikeXML = (str: string): boolean => {
+    if (typeof str !== 'string') return false;
     str = str.trim();
     return str.startsWith('<') && str.endsWith('>') && str.includes('</');
 };

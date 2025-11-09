@@ -1,17 +1,17 @@
-export { 
-  classOf, 
-  looksLikeJSON, 
-  looksLikeXML, 
-  buildPath, 
-  lastKey, 
-  getMaxValueLength 
+export {
+    classOf,
+    looksLikeJSON,
+    looksLikeXML,
+    buildPath,
+    lastKey,
+    getMaxValueLength
 } from './helperUtils';
 
-export { 
-  isInViewport, 
-  smoothScrollTo, 
-  copyToClipboard, 
-  downloadFile, 
-  debounce, 
-  throttle 
+export {
+    isInViewport,
+    smoothScrollTo,
+    copyToClipboard,
+    downloadFile,
+    debounce,
+    throttle
 } from './domUtils';

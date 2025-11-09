@@ -84,8 +84,21 @@ const Viewer: React.FC = () => {
         `);
             }
         } else {
-            // 对于XML，简单处理
-            alert('XML内容: ' + data);
+            // 对于XML，在新窗口中显示格式化内容
+            const newWindow = window.open('', '_blank');
+            if (newWindow) {
+                newWindow.document.write(`
+          <html>
+            <head>
+              <title>XML查看器</title>
+              <style>
+                body { font-family: monospace; white-space: pre-wrap; }
+              </style>
+            </head>
+            <body>${data}</body>
+          </html>
+        `);
+            }
         }
     }, []);
 

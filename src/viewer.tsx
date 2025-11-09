@@ -12,10 +12,10 @@
  */
 import React, {useCallback, useEffect, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import { RenderNode } from './core';
-import { getMaxValueLength } from './utils';
+import RenderNode from './core/RenderNode';
+import {getMaxValueLength} from './utils';
 import '../styles.css';
-import { JSONValue } from './types';
+import {JSONValue} from './types';
 
 /**
  * Viewer 组件
@@ -67,7 +67,7 @@ const Viewer: React.FC = () => {
      * @param data - 要展开的数据
      * @param type - 数据类型 ('json' | 'xml')
      */
-    const handleExpand = useCallback((path: string, data: any, type: 'json' | 'xml') => {
+    const handleExpand = useCallback((data: any, type: 'json' | 'xml') => {
         // 在新窗口中显示展开的内容
         if (type === 'json') {
             const newWindow = window.open('', '_blank');

@@ -1,12 +1,7 @@
 import React, {useState} from 'react';
 import {JSONValue} from '../types';
 import {classOf, lastKey, looksLikeJSON, looksLikeXML} from '../utils';
-import {
-    JSONStringExpander,
-    XMLStringExpander,
-    ImageFloat,
-    URLActionButton
-} from '../components/ui';
+import {ImageFloat, JSONStringExpander, URLActionButton, XMLStringExpander} from '../core';
 
 /**
  * LeafNode 组件 - 普通叶子节点渲染器
