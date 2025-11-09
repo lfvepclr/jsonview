@@ -27,7 +27,8 @@ Demo json
   "zebra": "最后一个字段",
   "apple": "第一个字段",
   "mango": "中间字段",
-  "banana": "第二个字段"
+  "banana": "第二个字段",
+  "img_url": "https://raw.githubusercontent.com/yangxiaoge/jsonview/main/img/p1.png"
 }
 ```
 
