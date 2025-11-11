@@ -1,4 +1,5 @@
 import {useCallback, useState} from 'react';
+import {toast} from 'react-toastify';
 import {copyToClipboard} from '../utils';
 
 /**
@@ -11,7 +12,6 @@ export interface UseCopyOptions {
     formatJson?: boolean;
     /** 是否显示文字提示 */
     showToast?: boolean;
-
     /** 提示显示位置 */
     toastPosition?: 'mouse' | 'center' | 'top-right';
     /** 提示持续时间（毫秒） */
@@ -73,9 +73,8 @@ export const useCopy = (options: UseCopyOptions): UseCopyReturn => {
         data,
         formatJson = false,
         showToast = true,
-
-        toastPosition = 'mouse',
-        toastDuration = 1500,
+        toastPosition = 'bottom-center',
+        toastDuration = 2000,
         onSuccess,
         onError,
         feedbackDuration = 1000
@@ -105,9 +104,13 @@ export const useCopy = (options: UseCopyOptions): UseCopyReturn => {
      * 添加视觉反馈
      */
     const addVisualFeedback = useCallback((target: HTMLElement) => {
+        if (!target) return;
+
         target.classList.add('copied');
         setTimeout(() => {
-            target.classList.remove('copied');
+            if (target && target.classList) {
+                target.classList.remove('copied');
+            }
         }, feedbackDuration);
     }, [feedbackDuration]);
 
@@ -137,14 +140,23 @@ export const useCopy = (options: UseCopyOptions): UseCopyReturn => {
 
                 // 添加视觉反馈
                 const target = e.currentTarget as HTMLElement;
-                addVisualFeedback(target);
+                if (target) {
+                    addVisualFeedback(target);
+                }
 
                 // 显示文字提示
                 if (showToast) {
-                    setShowToastState(true);
+                    toast.success('已复制到剪贴板', {
+                        position: 'bottom-center',
+                        autoClose: toastDuration,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        theme: 'light',
+                    });
                 }
 
-                // 调用成功回调
                 onSuccess?.();
             } else {
                 throw new Error('复制到剪贴板失败');
@@ -152,6 +164,19 @@ export const useCopy = (options: UseCopyOptions): UseCopyReturn => {
         } catch (error) {
             setCopySuccess(false);
             const err = error instanceof Error ? error : new Error('未知复制错误');
+
+            if (showToast) {
+                toast.error('复制失败：' + err.message, {
+                    position: 'bottom-center',
+                    autoClose: toastDuration,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    theme: 'light',
+                });
+            }
+
             onError?.(err);
             console.error('复制失败:', err.message);
         } finally {
@@ -163,12 +188,10 @@ export const useCopy = (options: UseCopyOptions): UseCopyReturn => {
             }, feedbackDuration);
 
             // 重置提示状态
-            if (showToast) {
-                setTimeout(() => {
-                    setShowToastState(false);
-                    setMousePosition(null);
-                }, toastDuration);
-            }
+            setTimeout(() => {
+                setShowToastState(false);
+                setMousePosition(null);
+            }, toastDuration);
         }
     }, [data, isCopying, getCopyText, addVisualFeedback, onSuccess, onError, feedbackDuration, showToast, toastPosition, toastDuration]);
 

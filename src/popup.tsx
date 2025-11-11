@@ -11,8 +11,9 @@
  * @component
  */
 import React, {useCallback, useState} from 'react';
-import ReactDOM from 'react-dom/client';
-import {RenderNode} from './core/NodeRenderer';
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {RenderNode} from './core';
 import '../styles.css';
 import {FloatData, JSONValue} from './types';
 
@@ -40,7 +41,7 @@ const Popup: React.FC = () => {
     /**
      * 处理渲染按钮点击事件
      *
-     * 解析输入的 JSON 字符串并渲染结果
+     * 解析输入的 JSON 或 XML 字符串并渲染结果
      */
     const handleRender = useCallback(() => {
         const trimmedInput = inputValue.trim();
@@ -52,8 +53,7 @@ const Popup: React.FC = () => {
             setError(null);
             return;
         } catch (e) {
-            // JSON 解析失败，继续尝试其他格式
-            console.error('JSON解析错误:', (e as Error).message, '输入值:', trimmedInput);
+            console.error('JSON解析错误:', (e as Error).message);
         }
 
         // 检查是否为 XML
@@ -68,13 +68,71 @@ const Popup: React.FC = () => {
                     throw new Error(parserError.textContent || 'XML 解析错误');
                 }
 
-                // 如果成功解析为 XML，将其作为字符串传递给渲染器
-                setTreeData(trimmedInput);
+                // 将 XML 转换为可渲染的对象
+                const xmlToObject = (node: Node): any => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const text = node.textContent?.trim();
+                        return text || null;
+                    }
+
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const element = node as Element;
+                        const obj: any = {};
+
+                        // 处理属性
+                        if (element.attributes.length > 0) {
+                            obj['@attributes'] = {};
+                            for (let i = 0; i < element.attributes.length; i++) {
+                                const attr = element.attributes[i];
+                                obj['@attributes'][attr.name] = attr.value;
+                            }
+                        }
+
+                        // 处理子节点
+                        const children = Array.from(element.childNodes);
+                        const childElements = children.filter(child => child.nodeType === Node.ELEMENT_NODE);
+                        const textContent = children
+                            .filter(child => child.nodeType === Node.TEXT_NODE)
+                            .map(child => child.textContent?.trim())
+                            .filter(text => text && text.length > 0)
+                            .join('');
+
+                        if (childElements.length === 0) {
+                            // 只有文本内容
+                            if (textContent) {
+                                return textContent;
+                            }
+                        } else {
+                            // 有子元素
+                            childElements.forEach(child => {
+                                const childElement = child as Element;
+                                const childName = childElement.tagName;
+                                const childValue = xmlToObject(childElement);
+
+                                if (obj[childName]) {
+                                    // 处理同名元素
+                                    if (!Array.isArray(obj[childName])) {
+                                        obj[childName] = [obj[childName]];
+                                    }
+                                    obj[childName].push(childValue);
+                                } else {
+                                    obj[childName] = childValue;
+                                }
+                            });
+                        }
+
+                        return obj;
+                    }
+
+                    return null;
+                };
+
+                const rootObj = xmlToObject(xmlDoc.documentElement);
+                setTreeData(rootObj);
                 setError(null);
                 return;
             } catch (e) {
-                console.error('XML解析错误:', (e as Error).message, '输入值:', trimmedInput);
-                setError((e as Error).message);
+                setError('XML解析错误: ' + (e as Error).message);
                 return;
             }
         }
@@ -91,40 +149,35 @@ const Popup: React.FC = () => {
     const handleRenderNewWindow = useCallback(() => {
         const trimmedInput = inputValue.trim();
 
-        // 首先尝试解析为 JSON
-        try {
-            JSON.parse(trimmedInput); // 验证
-            window.open(`viewer.html?json=${encodeURIComponent(trimmedInput)}&path=${encodeURIComponent('$')}`, '_blank');
-            return;
-        } catch (e) {
-            // JSON 解析失败，继续尝试其他格式
-            console.error('新窗口JSON解析错误:', (e as Error).message, '输入值:', trimmedInput);
-        }
+        // 检测数据类型
+        let dataType: 'json' | 'xml' = 'json';
+        let dataStr = trimmedInput;
 
         // 检查是否为 XML
         if (trimmedInput.startsWith('<') && trimmedInput.endsWith('>')) {
-            try {
+            dataType = 'xml';
+        }
+
+        try {
+            if (dataType === 'json') {
+                JSON.parse(trimmedInput); // 验证 JSON
+            } else {
+                // 验证 XML
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
-
-                // 检查解析错误
                 const parserError = xmlDoc.querySelector('parsererror');
                 if (parserError) {
                     throw new Error(parserError.textContent || 'XML 解析错误');
                 }
-
-                // 如果成功解析为 XML，传递给查看器
-                window.open(`viewer.html?json=${encodeURIComponent(JSON.stringify(trimmedInput))}&path=${encodeURIComponent('$')}`, '_blank');
-                return;
-            } catch (e) {
-                console.error('新窗口XML解析错误:', (e as Error).message, '输入值:', trimmedInput);
-                alert('XML解析错误: ' + (e as Error).message);
-                return;
             }
-        }
 
-        // 如果既不是有效的 JSON 也不是有效的 XML
-        alert('输入既不是有效的 JSON 也不是有效的 XML');
+            // 使用 Chrome 扩展 API 创建新标签页
+            chrome.tabs.create({
+                url: chrome.runtime.getURL(`tabs/viewer.html?${dataType}=${encodeURIComponent(dataStr)}&path=${encodeURIComponent('$')}`)
+            });
+        } catch (e) {
+            alert(`${dataType.toUpperCase()}解析错误: ` + (e as Error).message);
+        }
     }, [inputValue]);
 
     /**
@@ -136,19 +189,19 @@ const Popup: React.FC = () => {
      * @param data - 要显示的数据
      * @param type - 数据类型 ('json' | 'xml')
      */
-    const handleExpand = useCallback((path: string, data: any, type: 'json' | 'xml') => {
+    const handleExpand = useCallback((_path: string, data: any, type: 'json' | 'xml') => {
         // 实现浮动层显示逻辑
-        setFloatData({path, data, type});
+        setFloatData({path: _path, data, type});
     }, []);
 
     return (
         <div>
-            <h3>输入 JSON</h3>
+            <h3>输入 JSON(支持内嵌XML) 或XML(支持内嵌JSON)</h3>
             <textarea
                 id="input"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="粘贴 JSON 字符串…"
+                placeholder="粘贴 JSON or XML 字符串…"
             />
             <div style={{display: 'flex', gap: '8px', marginTop: '8px'}}>
                 <button
@@ -186,17 +239,26 @@ const Popup: React.FC = () => {
                         {floatData.type === 'json' ? (
                             <pre>{JSON.stringify(floatData.data, null, 2)}</pre>
                         ) : (
-                            <pre>{floatData.data}</pre>
+                            <div>XML内容</div>
                         )}
                     </div>
                 </div>
             )}
+
+            <ToastContainer
+                position="bottom-center"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+            />
         </div>
     );
 };
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <Popup/>
-    </React.StrictMode>,
-);
+export default Popup;

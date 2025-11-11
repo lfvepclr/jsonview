@@ -1,0 +1,16 @@
+{
+  "manifest": {
+    "name": "Nested JSON Viewer",
+    "description": "Pretty-print JSON and recursively open stringified JSON",
+    "version": "1.0.0",
+    "permissions": [
+      "clipboardWrite"
+    ],
+    "action": {
+      "default_title": "Nested JSON Viewer"
+    }
+  },
+  "build": {
+    "sourceMap": false
+  }
+}

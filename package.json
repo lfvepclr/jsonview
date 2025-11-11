@@ -1,28 +1,33 @@
 {
   "name": "nested-json-viewer",
-  "private": true,
-  "version": "1.0.0",
-  "type": "module",
+  "displayName": "Nested JSON Viewer",
+  "version": "2.0.0",
+  "description": "Pretty-print JSON and recursively open stringified JSON",
+  "author": "Your Name",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "plasmo dev",
+    "build": "plasmo build",
+    "package": "plasmo package"
   },
   "dependencies": {
+    "plasmo": "^0.90.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
+    "@plasmohq/prettier-plugin-sort-imports": "^4.0.1",
     "@types/chrome": "^0.0.254",
+    "@types/node": "^20.11.5",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "prettier": "^3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "manifest": {
+    "permissions": [
+      "clipboardWrite",
+      "tabs"
+    ]
   }
 }
