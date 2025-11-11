@@ -85,14 +85,20 @@ export const downloadFile = (filename: string, content: string, mimeType: string
  * @param wait - 等待时间（毫秒）
  * @returns 防抖后的函数
  */
-export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): T => {
-    let timeout: NodeJS.Timeout | null = null;
-    return function (...args: any[]) {
+export const debounce = <T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+): (...args: Parameters<T>) => ReturnType<T> => {
+    let timeout: number | null = null;
+
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>): ReturnType<T> {
+        const context = this;
         if (timeout) {
             clearTimeout(timeout);
         }
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    } as T;
+        timeout = setTimeout(() => func.apply(context, args), wait);
+        return undefined as ReturnType<T>;
+    };
 };
 
 /**
@@ -102,13 +108,20 @@ export const debounce = <T extends (...args: any[]) => any>(func: T, wait: numbe
  * @param limit - 限制时间（毫秒）
  * @returns 节流后的函数
  */
-export const throttle = <T extends (...args: any[]) => any>(func: T, limit: number): T => {
+export const throttle = <T extends (...args: any[]) => any>(
+    func: T,
+    limit: number
+): (...args: Parameters<T>) => ReturnType<T> | undefined => {
     let inThrottle: boolean;
-    return function (...args: any[]) {
+
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>): ReturnType<T> | undefined {
+        const context = this;
         if (!inThrottle) {
-            func.apply(this, args);
+            const result = func.apply(context, args);
             inThrottle = true;
             setTimeout(() => inThrottle = false, limit);
+            return result;
         }
-    } as T;
+        return undefined;
+    };
 };
