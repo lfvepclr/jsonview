@@ -12,8 +12,7 @@
  */
 import React, {useCallback, useEffect, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import RenderNode from './core/RenderNode';
-import {getMaxValueLength} from './utils';
+import {RenderNode} from './core/NodeRenderer';
 import '../styles.css';
 import {JSONValue} from './types';
 
@@ -50,8 +49,8 @@ const Viewer: React.FC = () => {
                 setTreeData(obj);
 
                 // 动态宽度
-                const width = Math.max(420, getMaxValueLength(obj) * 8 + 100);
-                document.body.style.width = `${width}px`;
+                // const width = Math.max(420, getMaxValueLength(obj) * 8 + 100);
+                // document.body.style.width = `${width}px`;
             } catch (e) {
                 document.body.textContent = '解析失败：' + (e as Error).message;
             }

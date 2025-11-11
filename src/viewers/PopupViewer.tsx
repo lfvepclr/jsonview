@@ -11,7 +11,7 @@
  * @component
  */
 import React, {useCallback, useState} from 'react';
-import RenderNode from '../core/RenderNode';
+import {RenderNode} from '../core/NodeRenderer';
 import '../../styles.css';
 import {FloatData, JSONValue} from '../types';
 

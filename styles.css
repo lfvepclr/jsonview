@@ -203,7 +203,7 @@ textarea {
     justify-content: space-between;
     align-items: center;
     background: rgba(255, 255, 255, 0.9);
-    padding: 10px 15px;
+    padding: 6px 12px;
     border-radius: 8px 8px 0 0;
     width: 90%;
     max-width: 800px;
@@ -220,9 +220,9 @@ textarea {
     color: white;
     border: none;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -247,13 +247,13 @@ textarea {
 
 .image-url-display {
     background: rgba(255, 255, 255, 0.9);
-    padding: 8px 15px;
+    padding: 4px 8px;
     border-radius: 0 0 8px 8px;
     width: 90%;
     max-width: 800px;
     box-sizing: border-box;
     font-family: monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: #666;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -320,3 +320,57 @@ textarea {
     color: #0078d4;
     user-select: none;
 }
+
+/* 为value容器添加复制按钮支持 */
+.value-container.copyable::before {
+    content: '📋';
+    position: absolute;
+    left: -23px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #0078d4;
+    color: white;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 1000;
+}
+
+.value-container.copyable:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.value-container.copyable.copied::before {
+    content: '✔️';
+    background: #28a745;
+}
+
+/* 根级别特殊处理 */
+.node[data-depth="0"] .value-container.copyable::before,
+.root-level .value-container.copyable::before {
+    left: -30px; /* 调整根级别的位置 */
+}
+
+/* XML文本内容样式 */
+.xml-text {
+    color: #0b7500;
+    font-family: monospace;
+}
+
+/* 重新设计的层级颜色方案 */
+/* 层级0-2：浅色调蓝色系，组内有区别 */
+.node[data-depth="0"]::before { background: #e3f2fd; width: 2px; } /* 最浅蓝色 */
+.node[data-depth="1"]::before { background: #bbdefb; width: 2px; } /* 浅蓝色 */
+.node[data-depth="2"]::before { background: #90caf9; width: 2px; } /* 中浅蓝色 */
+
+/* 层级3-5：中等色调蓝紫色系，组内有区别 */
+.node[data-depth="3"]::before { background: #2196f3; width: 2px; } /* 标准蓝色 */
+.node[data-depth="4"]::before { background: #1976d2; width: 2px; } /* 深蓝色 */
+.node[data-depth="5"]::before { background: #3f51b5; width: 2px; } /* 蓝紫色（靛蓝） */
+.node[data-depth="6"]::before { background: #4a148c; width: 3px; }
+.node[data-depth="7"]::before { background: #6a1b9a; width: 3px; }
+.node[data-depth="8"]::before { background: #7b1fa2; width: 3px; }

@@ -12,7 +12,7 @@
  */
 import React, {useCallback, useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import RenderNode from './core/RenderNode';
+import {RenderNode} from './core/NodeRenderer';
 import '../styles.css';
 import {FloatData, JSONValue} from './types';
 
@@ -53,6 +53,7 @@ const Popup: React.FC = () => {
             return;
         } catch (e) {
             // JSON 解析失败，继续尝试其他格式
+            console.error('JSON解析错误:', (e as Error).message, '输入值:', trimmedInput);
         }
 
         // 检查是否为 XML
@@ -72,6 +73,7 @@ const Popup: React.FC = () => {
                 setError(null);
                 return;
             } catch (e) {
+                console.error('XML解析错误:', (e as Error).message, '输入值:', trimmedInput);
                 setError((e as Error).message);
                 return;
             }
@@ -96,6 +98,7 @@ const Popup: React.FC = () => {
             return;
         } catch (e) {
             // JSON 解析失败，继续尝试其他格式
+            console.error('新窗口JSON解析错误:', (e as Error).message, '输入值:', trimmedInput);
         }
 
         // 检查是否为 XML
@@ -114,6 +117,7 @@ const Popup: React.FC = () => {
                 window.open(`viewer.html?json=${encodeURIComponent(JSON.stringify(trimmedInput))}&path=${encodeURIComponent('$')}`, '_blank');
                 return;
             } catch (e) {
+                console.error('新窗口XML解析错误:', (e as Error).message, '输入值:', trimmedInput);
                 alert('XML解析错误: ' + (e as Error).message);
                 return;
             }

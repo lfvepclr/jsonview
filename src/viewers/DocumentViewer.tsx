@@ -11,7 +11,7 @@
  * @component
  */
 import React, {useCallback, useEffect, useState} from 'react';
-import RenderNode from '../core/RenderNode';
+import {RenderNode} from '../core/NodeRenderer';
 import {getMaxValueLength} from '../utils/helperUtils';
 import '../../styles.css';
 import {JSONValue} from '../types';
@@ -106,15 +106,7 @@ const Viewer: React.FC = () => {
         <div>
             {treeData && (
                 <>
-                    {/* 路径头 */}
-                    <div style={{
-                        padding: '10px',
-                        background: '#f0f0f0',
-                        font: '12px monospace',
-                        borderBottom: '1px solid #ccc'
-                    }}>
-                        完整JSON路径: {parentPath}
-                    </div>
+
 
                     <div id="tree">
                         <RenderNode
