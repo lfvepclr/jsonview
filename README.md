@@ -1,4 +1,6 @@
-# jsonview
+# NestedJonsViewer
+
+内嵌 JSON 和 XML ，自动展开。
 
 【解决开发者的小事】
 JSON中嵌入了 XML 或者 JSON 在开发者中很常见。 这个插件可以解析嵌套的JSON字段串，并显示为树形结构。解决嵌套JSON字段串 copy 再 paste 重新格式化的问题。
