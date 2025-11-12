@@ -1,4 +1,4 @@
-# NestedJonsViewer
+# <img src="assets/icon128.png" alt="alt jsonview" style="width:2em;">   NestedJonsViewer
 
 内嵌 JSON 和 XML ，自动展开。
 
