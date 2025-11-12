@@ -28,6 +28,16 @@ export class TypeDetector {
 
         // 字符串类型的细分检测
         if (typeof data === 'string') {
+            // 检查是否为 Base64 图片
+            if (this.isBase64Image(data)) {
+                return 'base64-image';
+            }
+
+            // 检查是否为 Base64 PDF
+            if (this.isBase64Pdf(data)) {
+                return 'base64-pdf';
+            }
+
             // 检查是否为图片 URL
             if (this.isImageUrl(data)) {
                 return 'image';
@@ -80,7 +90,7 @@ export class TypeDetector {
      * 简单类型为叶子节点，不需要递归
      */
     static isSimpleType(nodeType: NodeType): nodeType is SimpleType {
-        return ['image', 'url', 'string', 'number', 'boolean', 'null'].includes(nodeType);
+        return ['image', 'url', 'base64-image', 'base64-pdf', 'string', 'number', 'boolean', 'null'].includes(nodeType);
     }
 
     /**
@@ -120,6 +130,52 @@ export class TypeDetector {
     }
 
     /**
+     * 检查字符串是否为 Base64 图片
+     */
+    private static isBase64Image(str: string): boolean {
+        if (typeof str !== 'string') return false;
+
+        // 检查是否为 data URL 格式的图片
+        if (str.startsWith('data:image/')) {
+            return true;
+        }
+
+        // 检查裸 base64 的图片魔数
+        try {
+            const bytes = atob(str.slice(0, 8));
+            const head = bytes.slice(0, 4);
+            return (
+                head === '\x89PNG' ||
+                head.slice(0, 3) === '\xFF\xD8\xFF' ||
+                head.slice(0, 4) === 'GIF8'
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * 检查字符串是否为 Base64 PDF
+     */
+    private static isBase64Pdf(str: string): boolean {
+        if (typeof str !== 'string') return false;
+
+        // 检查是否为 data URL 格式的 PDF
+        if (str.startsWith('data:application/pdf')) {
+            return true;
+        }
+
+        // 检查裸 base64 的 PDF 魔数
+        try {
+            const bytes = atob(str.slice(0, 8));
+            return bytes.startsWith('%PDF');
+        } catch {
+            return false;
+        }
+    }
+
+
+    /**
      * 获取类型的显示名称
      */
     static getTypeDisplayName(nodeType: NodeType): string {
@@ -128,6 +184,8 @@ export class TypeDetector {
             'xml': 'XML',
             'image': 'Image',
             'url': 'URL',
+            'base64-image': 'Base64 Image',
+            'base64-pdf': 'Base64 PDF',
             'array': 'Array',
             'object': 'Object',
             'string': 'String',

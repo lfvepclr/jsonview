@@ -1,7 +1,17 @@
 import React from 'react';
 import {JSONValue} from '../types';
 import {TypeDetector} from './types';
-import {ArrayView, ImageView, JsonView, ObjectView, PrimitiveView, UrlView, XmlView} from './views';
+import {
+    ArrayView,
+    Base64ImageView,
+    Base64PdfView,
+    ImageView,
+    JsonView,
+    ObjectView,
+    PrimitiveView,
+    UrlView,
+    XmlView
+} from './views';
 
 /**
  * 新的节点渲染器接口
@@ -71,6 +81,12 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
 
         case 'url':
             return <UrlView {...viewProps} />;
+
+        case 'base64-image':
+            return <Base64ImageView {...viewProps} />;
+
+        case 'base64-pdf':
+            return <Base64PdfView {...viewProps} />;
 
         case 'array':
             return <ArrayView {...viewProps} />;
@@ -158,7 +174,7 @@ export interface RenderNodeProps {
 /**
  * RenderNode 组件 - 向后兼容性别名
  *
- * 这是原 RenderNode 组件的实现，现在作为 NodeRenderer 的包装器
+ * 这是原 RenderNode 组件的实现，现在作为 NodeRenderer 的别名
  * 主要职责：
  * 1. 作为渲染系统的主入口（向后兼容）
  * 2. 将所有渲染任务委托给 NodeRenderer

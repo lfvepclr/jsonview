@@ -9,6 +9,8 @@ export type NodeType =
     | 'xml'       // XML 字符串
     | 'image'     // 图片 URL
     | 'url'       // 普通 URL
+    | 'base64-image' // Base64 图片
+    | 'base64-pdf'   // Base64 PDF
     | 'array'     // 数组
     | 'object'    // 对象
     | 'string'    // 字符串
@@ -20,7 +22,7 @@ export type NodeType =
  * 复合类型和简单类型分类
  */
 export type CompositeType = 'json' | 'xml' | 'array' | 'object';
-export type SimpleType = 'image' | 'url' | 'string' | 'number' | 'boolean' | 'null';
+export type SimpleType = 'image' | 'url' | 'base64-image' | 'base64-pdf' | 'string' | 'number' | 'boolean' | 'null';
 
 /**
  * 视图组件基础接口

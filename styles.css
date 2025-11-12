@@ -1,3 +1,5 @@
+/* 模态样式已内联，无需额外导入 */
+
 body {
     min-width: 420px;
     font-family: "Segoe UI", Arial, sans-serif;
@@ -374,3 +376,25 @@ textarea {
 .node[data-depth="6"]::before { background: #4a148c; width: 3px; }
 .node[data-depth="7"]::before { background: #6a1b9a; width: 3px; }
 .node[data-depth="8"]::before { background: #7b1fa2; width: 3px; }
+
+/* 模态框动画 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translate(-50%, -45%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

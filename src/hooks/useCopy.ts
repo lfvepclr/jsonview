@@ -230,5 +230,11 @@ export const copyPresets = {
     string: (data: string): UseCopyOptions => ({
         data,
         formatJson: false
+    }),
+
+    /** Base64字符串复制配置 - 保留转义字符 */
+    base64: (data: string): UseCopyOptions => ({
+        data: JSON.stringify(data).slice(1, -1), // 移除JSON.stringify添加的外层引号，但保留内部转义字符
+        formatJson: false
     })
 };

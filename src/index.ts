@@ -1,3 +1,5 @@
+// CSS样式导入已移除，不再需要react-pdf相关样式
+
 // 核心渲染组件
 export {default as NodeRenderer, RenderNode, createNodeRenderer, smartRenderNode} from './core/NodeRenderer';
 // 以下组件在重组后不再存在，已合并到新的架构中
