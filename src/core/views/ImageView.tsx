@@ -1,8 +1,7 @@
 import React, {useState} from 'react';
-import { Modal } from 'antd';
+import {Modal} from 'antd';
 import {ViewComponentProps} from '../types';
 import {lastKey} from '../../utils';
-
 
 
 /**
@@ -63,7 +62,7 @@ const ImageView: React.FC<ViewComponentProps> = ({
                 open={isModalOpen}
                 onCancel={closeModal}
                 width={1024}
-                style={{ top: 20 }}
+                style={{top: 20}}
                 styles={{
                     body: {
                         maxHeight: 'calc(90vh - 110px)',

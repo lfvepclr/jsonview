@@ -13,7 +13,7 @@ export const Base64PdfView: React.FC<ViewComponentProps> = ({
     path,
     depth
 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     if (typeof data !== 'string') {
         return null;
@@ -65,7 +65,7 @@ export const Base64PdfView: React.FC<ViewComponentProps> = ({
                         whiteSpace: 'nowrap',
                         display: 'inline-block'
                     }}>
-                        {data.length > 50 ? data.substring(0, 50) + '...' : data}
+                        {data.length > 200 ? data.substring(0, 200) + '...' : data}
                     </span>
                 </div>
             </div>
@@ -75,7 +75,7 @@ export const Base64PdfView: React.FC<ViewComponentProps> = ({
                 <div className="children-wrapper">
                     {/* PDF预览 */}
                     <div style={{ marginBottom: '12px' }}>
-                        <InlinePdfPreview base64Data={cleanBase64} maxHeight={300} />
+                        <InlinePdfPreview base64Data={cleanBase64} maxHeight={500} />
                     </div>
                 </div>
             )}

@@ -51,9 +51,9 @@ const Viewer: React.FC = () => {
                 const obj = JSON.parse(jsonStr);
                 setTreeData(obj);
 
-                // 调整宽度
-                const width = Math.max(420, getMaxValueLength(obj) * 8 + 100);
-                document.body.style.width = `${width}px`;
+                // // 调整宽度
+                // const width = Math.max(420, getMaxValueLength(obj) * 8 + 100);
+                // document.body.style.width = `${width}px`;
             } catch (e) {
                 document.body.textContent = '解析错误：' + (e as Error).message;
             }

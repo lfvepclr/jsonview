@@ -1,6 +1,6 @@
 import React from 'react'
-import { Modal, Button } from 'antd'
-import { DownloadOutlined } from '@ant-design/icons'
+import {Button, Modal} from 'antd'
+import {DownloadOutlined} from '@ant-design/icons'
 import {generateImageFileName} from '../utils/fileNameGenerator'
 
 // 内联 base64ToBlob 功能
@@ -52,7 +52,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
             open={isOpen}
             onCancel={onClose}
             width={1024}
-            style={{ top: 20 }}
+            style={{top: 20}}
             styles={{
                 body: {
                     maxHeight: 'calc(90vh - 110px)',
@@ -60,14 +60,14 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({
                     padding: '16px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'flex-start'
                 }
             }}
             footer={[
                 <Button
                     key="download"
                     type="primary"
-                    icon={<DownloadOutlined />}
+                    icon={<DownloadOutlined/>}
                     onClick={handleDownload}
                 >
                     下载

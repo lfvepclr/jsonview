@@ -13,7 +13,7 @@ export const Base64ImageView: React.FC<ViewComponentProps> = ({
     path,
     depth
 }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     if (typeof data !== 'string') {
         return null;

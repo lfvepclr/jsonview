@@ -10,8 +10,8 @@ export {default as NodeRenderer, RenderNode, createNodeRenderer, smartRenderNode
 // export {default as XmlRenderer} from './core/XmlRenderer';
 
 // 查看器组件
-export {default as PopupViewer} from './viewers/PopupViewer';
-export {default as DocumentViewer} from './viewers/DocumentViewer';
+// export {default as PopupViewer} from './viewers/PopupViewer';
+// export {default as DocumentViewer} from './viewers/DocumentViewer';
 
 // UI组件
 export {default as URLActionButton} from './components/URLActionButton';
