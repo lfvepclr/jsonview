@@ -5,7 +5,7 @@ import { pdfjs } from 'react-pdf';
 export const initializePdfWorker = () => {
   // 使用chrome.runtime.getURL指向public目录下的worker文件
   // Plasmo会自动将public/目录下的文件作为web_accessible_resources
-  pdfjs.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('pdf.worker.min.js');
+  pdfjs.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('static/pdf.worker.min.js');
 };
 
 // 导出pdfjs以供其他组件使用

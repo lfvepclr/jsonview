@@ -5,8 +5,8 @@
   "description": "Pretty-print JSON in JSON. add support for base64pdf and base64image and embedded json and embedded xml",
   "author": "Your Name",
   "scripts": {
-    "dev": "plasmo dev",
-    "build": "plasmo build",
+    "dev": "mkdir -p build/chrome-mv3-dev/static && cp -r static/* build/chrome-mv3-dev/static/ && plasmo dev",
+    "build": "plasmo build && cp -r static/* build/chrome-mv3-prod/static/",
     "package": "plasmo package"
   },
   "dependencies": {
