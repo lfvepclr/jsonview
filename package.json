@@ -1,7 +1,7 @@
 {
   "name": "nested-json-viewer",
   "displayName": "Nested JSON Viewer",
-  "version": "2.5.0",
+  "version": "3.0.0",
   "description": "Pretty-print JSON in JSON. add support for base64pdf and base64image and embedded json and embedded xml",
   "author": "Your Name",
   "scripts": {
