@@ -1,12 +1,12 @@
 {
   "name": "nested-json-viewer",
   "displayName": "Nested JSON Viewer",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Pretty-print JSON in JSON. add support for base64pdf and base64image and embedded json and embedded xml",
-  "author": "Your Name",
+  "author": "Spencer",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build",
+    "build": "plasmo build --no-minify --bundle-arg=--external:pdfjs-dist/build/pdf.worker.min.mjs",
     "package": "plasmo package"
   },
   "dependencies": {

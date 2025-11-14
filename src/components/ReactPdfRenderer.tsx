@@ -1,8 +1,7 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {Alert, Button, Space, Spin} from 'antd';
-import {FullscreenOutlined,  PlusOutlined, MinusOutlined, RightOutlined, LeftOutlined} from '@ant-design/icons';
+import {FullscreenOutlined, LeftOutlined, MinusOutlined, PlusOutlined, RightOutlined} from '@ant-design/icons';
 import {Document, Page} from 'react-pdf';
-import {pdfjs} from '../utils/pdfWorker';
 // 引入 react-pdf 所需的样式文件，解决 TextLayer 和 AnnotationLayer 警告
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -26,10 +25,7 @@ const ReactPdfRenderer: React.FC<ReactPdfRendererProps> = ({
     const [error, setError] = useState<string>('');
     const [scale, setScale] = useState(1.0);
 
-    // 初始化PDF worker
-    useEffect(() => {
-        pdfjs
-    }, []);
+
 
     // 清理base64数据，确保格式正确
     const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, '');

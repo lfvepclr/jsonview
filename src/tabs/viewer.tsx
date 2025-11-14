@@ -17,6 +17,13 @@ import {getMaxValueLength} from '../utils/helperUtils';
 import '../../styles.css';
 import {JSONValue} from '../types';
 
+import { pdfjs } from 'react-pdf';
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+).toString();
+
 /**
  * Viewer 组件
  *

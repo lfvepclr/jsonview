@@ -11,11 +11,9 @@
  * @component
  */
 import React, {useCallback, useState} from 'react';
-import {ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import {RenderNode} from './core';
 import '../styles.css';
-import {FloatData, JSONValue} from './types';
+import {JSONValue} from './types';
 
 /**
  * Popup 组件
@@ -34,9 +32,6 @@ const Popup: React.FC = () => {
 
     /** 错误信息 */
     const [error, setError] = useState<string | null>(null);
-
-    /** 浮层数据 */
-    const [floatData, setFloatData] = useState<FloatData | null>(null);
 
     /**
      * 处理渲染按钮点击事件
@@ -180,19 +175,6 @@ const Popup: React.FC = () => {
         }
     }, [inputValue]);
 
-    /**
-     * 处理展开浮层事件
-     *
-     * 显示指定路径的数据在浮层中
-     *
-     * @param path - 数据路径
-     * @param data - 要显示的数据
-     * @param type - 数据类型 ('json' | 'xml')
-     */
-    const handleExpand = useCallback((_path: string, data: any, type: 'json' | 'xml') => {
-        // 实现浮动层显示逻辑
-        setFloatData({path: _path, data, type});
-    }, []);
 
     return (
         <div>
@@ -220,43 +202,6 @@ const Popup: React.FC = () => {
                 <div id="tree">❌ {error}</div>
             )}
 
-            {treeData && (
-                <div id="tree">
-                    <RenderNode
-                        data={treeData}
-                        onExpand={handleExpand}
-                    />
-                </div>
-            )}
-
-            {floatData && (
-                <div id="floatLayer" className="float-layer">
-                    <div className="float-header">
-                        <span id="floatPath">完整{floatData.type.toUpperCase()}路径: {floatData.path}</span>
-                        <button id="closeFloat" onClick={() => setFloatData(null)}>×</button>
-                    </div>
-                    <div id="floatBody">
-                        {floatData.type === 'json' ? (
-                            <pre>{JSON.stringify(floatData.data, null, 2)}</pre>
-                        ) : (
-                            <div>XML内容</div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            <ToastContainer
-                position="bottom-center"
-                autoClose={2000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-            />
         </div>
     );
 };
