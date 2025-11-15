@@ -1,6 +1,4 @@
-# <img src="assets/icon.png" alt="alt jsonview" style="width:2em;">   NestedJonsViewer
-
-### Nested JSON Viewer - 嵌套JSON查看器
+## <img src="assets/icon.png" alt="alt jsonview" style="width:2em;">   Nested JSON Viewer - 嵌套JSON查看器
 
 **English**: A powerful browser extension for pretty-printing and visualizing nested JSON, XML, Base64 images, and PDFs.
 
