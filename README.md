@@ -109,6 +109,8 @@ nested-json-viewer/
 │   │   └── ExpandContext.tsx        # 展开状态管理
 │   ├── core/               # 核心渲染逻辑
 │   │   ├── NodeRenderer.tsx         # 节点渲染器
+│   │   ├── types/                   # 类型检测器
+│   │   ├── views/                   # 子视图渲染器
 │   │   └── index.ts                 # 核心导出
 │   ├── hooks/              # 自定义Hooks
 │   │   ├── useCopy.ts               # 复制功能
@@ -221,51 +223,72 @@ nested-json-viewer/
 
 #### 场景：添加一个新的数据类型SubView
 
-假设我们要添加一个 **时间戳转换器** SubView，将Unix时间戳转换为可读时间。
+假设我们要添加一个 **基本类型转换器** SubView，将Unix时间戳转换为可读时间。
 
 #### 步骤1：创建SubView组件
 
-在 `src/components/` 目录下创建 `TimestampView.tsx`：
+在 `src/core/views/` 目录下创建 `PrimitiveView.tsx`：
 
 ```typescript
-// src/components/TimestampView.tsx
+// src/core/views/PrimitiveView.tsx
 import React from 'react';
-
-interface TimestampViewProps {
-  value: number;
-}
+import {ViewComponentProps} from '../types';
+import {classOf, lastKey} from '../../utils';
+import {copyPresets, useCopy} from '../../hooks';
 
 /**
- * 时间戳转换器组件
- * 将Unix时间戳转换为可读时间格式
+ * 基础类型视图组件
+ * 处理字符串、数值、布尔值、null 等简单类型的渲染
  */
-export const TimestampView: React.FC<TimestampViewProps> = ({ value }) => {
-  // 转换时间戳
-  const formatTimestamp = (timestamp: number): string => {
-    // 判断是秒还是毫秒
-    const date = timestamp > 1e10 
-      ? new Date(timestamp) 
-      : new Date(timestamp * 1000);
-    
-    return date.toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
+const PrimitiveView: React.FC<ViewComponentProps> = ({
+                                                         data,
+                                                         path,
+                                                         depth
+                                                     }) => {
+    const keyName = lastKey(path);
+    const dataType = classOf(data);
 
-  return (
-    <div className="timestamp-view">
-      <span className="timestamp-value">{formatTimestamp(value)}</span>
-      <span className="timestamp-original">({value})</span>
-    </div>
-  );
+    // 使用统一的复制功能Hook
+    const {handleCopy} = useCopy(copyPresets.primitive(data));
+
+    /**
+     * 判断是否应该显示key
+     * 需要区分XML元素名和JSON属性key
+     */
+    const shouldShowKey = (path: string, keyName: string): boolean => {
+        // 如果路径包含#xml-content#，说明是XML委托渲染
+        if (path.includes('#xml-content#')) {
+            // 检查keyName是否是XML元素名
+            // XML元素名通常出现在路径的最后部分，格式如：request#xml-content#url
+            const xmlContentIndex = path.lastIndexOf('#xml-content#');
+            if (xmlContentIndex !== -1) {
+                const xmlElementName = path.substring(xmlContentIndex + '#xml-content#'.length);
+                // 如果keyName等于XML元素名，则不显示（这是XML元素名，不是JSON属性key）
+                if (keyName === xmlElementName) {
+                    return false;
+                }
+            }
+            // 其他情况下，如果是XML内容中的JSON属性，则显示key
+            return true;
+        }
+
+        // 非XML委托的情况，正常显示key
+        return true;
+    };
+
+    return (
+        <div className="node" data-depth={depth}>
+    <div className="value-container copyable" onClick={handleCopy}>
+        {keyName && path !== '$' && shouldShowKey(path, keyName) && (
+            <span className="key">{keyName}: </span>
+)}
+    <span className={dataType}>{JSON.stringify(data)}</span>
+        </div>
+        </div>
+);
 };
 
-export default TimestampView;
+export default PrimitiveView;
 ```
 
 #### 步骤2：注册SubView类型
@@ -273,32 +296,41 @@ export default TimestampView;
 在 `src/core/NodeRenderer.tsx` 中添加新的类型检测和渲染：
 
 ```typescript
-// 1. 在 TypeDetector 中添加新的类型检测
-// src/core/types.ts 或相关类型检测文件
-const detectNodeType = (data: any): string => {
-  // 现有类型检测...
-  
-  // 添加时间戳检测
-  if (typeof data === 'number' && data > 1e9 && data < 2e10) {
-    return 'timestamp';
-  }
-  
-  return 'number'; // 默认类型
-};
-
-// 2. 在 NodeRenderer 中添加新的case
+// 在 NodeRenderer 中添加新的case
 // src/core/NodeRenderer.tsx
-import { TimestampView } from '../components/TimestampView';
+import { PrimitiveView } from './views';
 
 // 在 switch 语句中添加
 switch (nodeType) {
   // 现有case...
-  case 'timestamp':
-    return <TimestampView value={data} />;
+    case 'string':
+    case 'number':
+    case 'boolean':
+    case 'null':
+    default:
+        return <PrimitiveView {...viewProps} />;
 }
 ```
 
-#### 步骤3：添加样式（可选）
+#### 步骤3：添加类型检测器
+
+在 `src/core/types/TypeDetector.ts` 中添加新的类型检测：
+
+```typescript
+// 在 TypeDetector 中添加新的类型检测
+// src/core/types/TypeDetector.ts
+const detectNodeType = (data: any): string => {
+  // 现有类型检测...
+  
+  // 添加数字检测
+  if (typeof data === 'number' ) {
+    return 'number';
+  }
+  return 'string'; // 默认类型
+};
+```
+
+#### 步骤4：添加样式（可选）
 
 在 `styles.css` 中添加样式：
 
