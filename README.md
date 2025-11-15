@@ -1,10 +1,24 @@
 # <img src="assets/icon128.png" alt="alt jsonview" style="width:2em;">   NestedJonsViewer
 
-内嵌 JSON 和 XML ，自动展开。
+### Nested JSON Viewer - 嵌套JSON查看器
 
-【解决开发者的小事】
-JSON中嵌入了 XML 或者 JSON 在开发者中很常见。 这个插件可以解析嵌套的JSON字段串，并显示为树形结构。解决嵌套JSON字段串 copy 再 paste 重新格式化的问题。
+**English**: A powerful browser extension for pretty-printing and visualizing nested JSON, XML, Base64 images, and PDFs.
 
+**中文**：一个强大的浏览器扩展，用于美化和可视化嵌套JSON、XML、Base64图片和PDF文件。
+
+---
+
+### 🚀 功能特性 | Features
+
+- **智能格式识别**：自动识别JSON、XML、Base64图片、Base64 PDF、URL链接等
+- **树形结构展示**：层次化展示复杂数据结构
+- **图片预览**：支持Base64图片内联预览
+- **PDF预览**：支持Base64 PDF文件预览
+- **URL操作**：支持图片和链接的快速操作
+- **复制功能**：一键复制任意节点数据
+- **响应式设计**：适配不同屏幕尺寸
+
+---
 
 ## Downloads
 
@@ -68,3 +82,287 @@ JSON中嵌入了 XML 或者 JSON 在开发者中很常见。 这个插件可以�
 显示结果
 ![alt jsonview](img/xml_json.png)
 
+
+### 📋 开发者文档 | Developer Documentation
+
+### 🛠️ 技术栈 | Tech Stack
+
+- **框架**: React 18 + TypeScript
+- **构建工具**: Plasmo Framework
+- **UI库**: Ant Design
+- **PDF渲染**: react-pdf + pdfjs-dist
+- **样式**: CSS Modules + 自定义样式
+
+---
+
+### 📦 项目结构 | Project Structure
+
+```
+nested-json-viewer/
+├── src/
+│   ├── components/          # 可复用组件
+│   │   ├── ImagePreviewModal.tsx    # 图片预览弹窗
+│   │   ├── InlineImagePreview.tsx   # 内联图片预览
+│   │   ├── InlinePdfPreview.tsx     # 内联PDF预览
+│   │   ├── PdfPreviewModal.tsx      # PDF预览弹窗
+│   │   ├── ReactPdfRenderer.tsx     # PDF渲染器
+│   │   └── URLActionButton.tsx      # URL操作按钮
+│   ├── context/             # React Context
+│   │   └── ExpandContext.tsx        # 展开状态管理
+│   ├── core/               # 核心渲染逻辑
+│   │   ├── NodeRenderer.tsx         # 节点渲染器
+│   │   └── index.ts                 # 核心导出
+│   ├── hooks/              # 自定义Hooks
+│   │   ├── useCopy.ts               # 复制功能
+│   │   ├── useExpand.ts             # 展开/收起
+│   │   └── useFloatData.ts          # 浮层数据
+│   ├── tabs/               # 标签页组件
+│   │   └── viewer.tsx               # 主查看器
+│   ├── types/              # TypeScript类型定义
+│   │   ├── base64Types.ts           # Base64相关类型
+│   │   ├── jsonTypes.ts             # JSON相关类型
+│   │   ├── uiTypes.ts               # UI相关类型
+│   │   └── index.ts                 # 类型导出
+│   ├── utils/              # 工具函数
+│   │   ├── domUtils.ts              # DOM操作
+│   │   ├── fileNameGenerator.ts     # 文件名生成
+│   │   ├── helperUtils.ts           # 辅助函数
+│   │   ├── jsonDetectionConfig.ts   # JSON检测配置
+│   │   └── pdfWorker.ts             # PDF工作线程
+│   ├── styles/             # 样式文件
+│   │   └── animations.css           # 动画效果
+│   ├── popup.tsx           # 弹出窗口
+│   └── index.ts            # 入口文件
+├── package.json            # 项目配置
+├── plasmo.config.ts        # Plasmo配置
+├── tsconfig.json          # TypeScript配置
+└── styles.css             # 全局样式
+```
+
+---
+
+### 🏗️ 环境构建 | Environment Setup
+
+#### 系统要求
+- **Node.js**: >= 16.0.0
+- **npm**: >= 8.0.0 或 **yarn**: >= 1.22.0
+- **Chrome**: >= 88 或 **Edge**: >= 88
+
+#### 安装步骤
+
+1. **克隆项目**
+   ```bash
+   git clone https://github.com/lfvepclr/nested-json-viewer.git
+   cd nested-json-viewer
+   ```
+
+2. **安装依赖**
+   ```bash
+   npm install
+   # 或使用 yarn
+   yarn install
+   ```
+
+3. **开发环境启动**
+   ```bash
+   npm run dev
+   # 或使用 yarn
+   yarn dev
+   ```
+
+4. **构建生产版本**
+   ```bash
+   npm run build
+   # 或使用 yarn
+   yarn build
+   ```
+
+---
+
+### 🔄 开发模式 | Development Mode
+
+#### 分支开发策略
+本项目采用 **main分支开发** 模式：
+
+- **main**: 主分支，始终保持可发布状态
+- **feature/***: 功能分支，用于开发新功能
+- **hotfix/***: 紧急修复分支，用于修复生产问题
+
+#### 开发流程
+
+1. **创建功能分支**
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **开发新功能**
+   ```bash
+   # 开发过程中
+   npm run dev
+   
+   # 提交代码
+   git add .
+   git commit -m "feat: 添加新功能描述"
+   ```
+
+3. **推送分支**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+4. **创建Pull Request**
+    - 在GitHub上创建PR到main分支
+    - 等待代码审查
+    - 合并到main分支
+
+---
+
+### 🎯 实现SubView的最简单步骤 | Simple SubView Implementation
+
+#### 场景：添加一个新的数据类型SubView
+
+假设我们要添加一个 **时间戳转换器** SubView，将Unix时间戳转换为可读时间。
+
+#### 步骤1：创建SubView组件
+
+在 `src/components/` 目录下创建 `TimestampView.tsx`：
+
+```typescript
+// src/components/TimestampView.tsx
+import React from 'react';
+
+interface TimestampViewProps {
+  value: number;
+}
+
+/**
+ * 时间戳转换器组件
+ * 将Unix时间戳转换为可读时间格式
+ */
+export const TimestampView: React.FC<TimestampViewProps> = ({ value }) => {
+  // 转换时间戳
+  const formatTimestamp = (timestamp: number): string => {
+    // 判断是秒还是毫秒
+    const date = timestamp > 1e10 
+      ? new Date(timestamp) 
+      : new Date(timestamp * 1000);
+    
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  return (
+    <div className="timestamp-view">
+      <span className="timestamp-value">{formatTimestamp(value)}</span>
+      <span className="timestamp-original">({value})</span>
+    </div>
+  );
+};
+
+export default TimestampView;
+```
+
+#### 步骤2：注册SubView类型
+
+在 `src/core/NodeRenderer.tsx` 中添加新的类型检测和渲染：
+
+```typescript
+// 1. 在 TypeDetector 中添加新的类型检测
+// src/core/types.ts 或相关类型检测文件
+const detectNodeType = (data: any): string => {
+  // 现有类型检测...
+  
+  // 添加时间戳检测
+  if (typeof data === 'number' && data > 1e9 && data < 2e10) {
+    return 'timestamp';
+  }
+  
+  return 'number'; // 默认类型
+};
+
+// 2. 在 NodeRenderer 中添加新的case
+// src/core/NodeRenderer.tsx
+import { TimestampView } from '../components/TimestampView';
+
+// 在 switch 语句中添加
+switch (nodeType) {
+  // 现有case...
+  case 'timestamp':
+    return <TimestampView value={data} />;
+}
+```
+
+#### 步骤3：添加样式（可选）
+
+在 `styles.css` 中添加样式：
+
+```css
+.timestamp-view {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timestamp-value {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.timestamp-original {
+  color: #8c8c8c;
+  font-size: 0.9em;
+}
+```
+
+#### 步骤4：测试SubView
+
+使用测试数据验证
+
+---
+
+### 🧪 测试指南 | Testing Guide
+
+#### 本地测试
+1. **开发模式测试**
+   ```bash
+   npm run dev
+   ```
+   然后在浏览器中加载扩展的 `build/chrome-mv3-dev` 目录
+
+2. **生产模式测试**
+   ```bash
+   npm run build
+   ```
+   然后加载 `build/chrome-mv3-prod` 目录
+
+---
+
+### 📋 贡献指南 | Contributing
+
+1. **Fork 项目**
+2. **创建功能分支** (`git checkout -b feature/AmazingFeature`)
+3. **提交更改** (`git commit -m 'Add some AmazingFeature'`)
+4. **推送到分支** (`git push origin feature/AmazingFeature`)
+5. **创建 Pull Request**
+
+---
+
+### 📄 许可证 | License
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+---
+
+### 🙏 致谢 | Acknowledgments
+
+- [Plasmo Framework](https://www.plasmo.com/) - 优秀的浏览器扩展开发框架
+- [Ant Design](https://ant.design/) - 美观的UI组件库
+- [React PDF](https://github.com/wojtekmaj/react-pdf) - PDF渲染库
