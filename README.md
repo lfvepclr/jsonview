@@ -1,4 +1,4 @@
-# <img src="assets/icon128.png" alt="alt jsonview" style="width:2em;">   NestedJonsViewer
+# <img src="assets/icon.png" alt="alt jsonview" style="width:2em;">   NestedJonsViewer
 
 ### Nested JSON Viewer - 嵌套JSON查看器
 
