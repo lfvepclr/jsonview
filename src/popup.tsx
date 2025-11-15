@@ -1,207 +1,306 @@
-/**
- * Popup 组件 - 浏览器扩展弹出窗口主界面
- *
- * 这是浏览器扩展的主界面，用户可以在此输入 JSON 数据并查看渲染结果。
- * 它提供了以下功能：
- * 1. JSON 输入和验证
- * 2. JSON 数据渲染
- * 3. 新窗口查看功能
- * 4. 浮动层展示功能
- *
- * @component
- */
-import React, {useCallback, useState} from 'react';
-import 'react-toastify/dist/ReactToastify.css';
-import '../styles.css';
-import {JSONValue} from './types';
+import '@ant-design/v5-patch-for-react-19';
+import React, { useCallback, useState, useEffect } from 'react';
+import { Button, Input, Space, Card, Tag, Typography, message } from 'antd';
+import {
+    EyeOutlined,
+    ClearOutlined,
+    CopyOutlined,
+    CodeOutlined,
+    FileTextOutlined,  // ✅ 修正
+    CheckCircleOutlined,
+    CloseCircleOutlined, // ✅ 新增
+    InfoCircleOutlined
+} from '@ant-design/icons';
+import "antd/dist/reset.css";
+import './popup.css';
 
-/**
- * Popup 组件
- *
- * 主要职责：
- * 1. 提供用户界面用于输入和渲染 JSON 数据
- * 2. 处理用户交互（渲染、新窗口查看等）
- * 3. 管理组件状态（输入值、渲染数据、错误信息等）
- */
+const { TextArea } = Input;
+const { Text } = Typography;
+
 const Popup: React.FC = () => {
-    /** 用户输入的 JSON 字符串 */
     const [inputValue, setInputValue] = useState('');
+    const [detectedType, setDetectedType] = useState<'json' | 'xml' | null>(null);
+    const [isParsing, setIsParsing] = useState(false);
 
-    /** 解析后的 JSON 数据 */
-    const [treeData, setTreeData] = useState<JSONValue | null>(null);
-
-    /** 错误信息 */
-    const [error, setError] = useState<string | null>(null);
-
-    /**
-     * 处理渲染按钮点击事件
-     *
-     * 解析输入的 JSON 或 XML 字符串并渲染结果
-     */
-    const handleRender = useCallback(() => {
-        const trimmedInput = inputValue.trim();
-
-        // 首先尝试解析为 JSON
-        try {
-            const obj = JSON.parse(trimmedInput);
-            setTreeData(obj);
-            setError(null);
+    // 智能检测数据类型
+    useEffect(() => {
+        const trimmed = inputValue.trim();
+        if (!trimmed) {
+            setDetectedType(null);
             return;
-        } catch (e) {
-            console.error('JSON解析错误:', (e as Error).message);
         }
 
-        // 检查是否为 XML
-        if (trimmedInput.startsWith('<') && trimmedInput.endsWith('>')) {
-            try {
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
-
-                // 检查解析错误
-                const parserError = xmlDoc.querySelector('parsererror');
-                if (parserError) {
-                    throw new Error(parserError.textContent || 'XML 解析错误');
-                }
-
-                // 将 XML 转换为可渲染的对象
-                const xmlToObject = (node: Node): any => {
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        const text = node.textContent?.trim();
-                        return text || null;
-                    }
-
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        const element = node as Element;
-                        const obj: any = {};
-
-                        // 处理属性
-                        if (element.attributes.length > 0) {
-                            obj['@attributes'] = {};
-                            for (let i = 0; i < element.attributes.length; i++) {
-                                const attr = element.attributes[i];
-                                obj['@attributes'][attr.name] = attr.value;
-                            }
-                        }
-
-                        // 处理子节点
-                        const children = Array.from(element.childNodes);
-                        const childElements = children.filter(child => child.nodeType === Node.ELEMENT_NODE);
-                        const textContent = children
-                            .filter(child => child.nodeType === Node.TEXT_NODE)
-                            .map(child => child.textContent?.trim())
-                            .filter(text => text && text.length > 0)
-                            .join('');
-
-                        if (childElements.length === 0) {
-                            // 只有文本内容
-                            if (textContent) {
-                                return textContent;
-                            }
-                        } else {
-                            // 有子元素
-                            childElements.forEach(child => {
-                                const childElement = child as Element;
-                                const childName = childElement.tagName;
-                                const childValue = xmlToObject(childElement);
-
-                                if (obj[childName]) {
-                                    // 处理同名元素
-                                    if (!Array.isArray(obj[childName])) {
-                                        obj[childName] = [obj[childName]];
-                                    }
-                                    obj[childName].push(childValue);
-                                } else {
-                                    obj[childName] = childValue;
-                                }
-                            });
-                        }
-
-                        return obj;
-                    }
-
-                    return null;
-                };
-
-                const rootObj = xmlToObject(xmlDoc.documentElement);
-                setTreeData(rootObj);
-                setError(null);
-                return;
-            } catch (e) {
-                setError('XML解析错误: ' + (e as Error).message);
-                return;
-            }
+        if (trimmed.startsWith('<') && trimmed.includes('>')) {
+            setDetectedType('xml');
+        } else if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+            (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+            setDetectedType('json');
+        } else {
+            setDetectedType(null);
         }
-
-        // 如果既不是有效的 JSON 也不是有效的 XML
-        setError('输入既不是有效的 JSON 也不是有效的 XML');
     }, [inputValue]);
 
-    /**
-     * 处理新窗口查看按钮点击事件
-     *
-     * 在新窗口中打开详细视图
-     */
+    // 显示格式化错误
+    const showParseError = useCallback((type: 'json' | 'xml', errorMsg: string) => {
+        message.open({
+            type: 'error',
+            content: (
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    <Space>
+                        <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
+                        <Text strong>{type.toUpperCase()} 解析错误</Text>
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: '12px', display: 'block' }}>
+                        {errorMsg}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: '11px' }}>
+                        提示：检查括号匹配、引号、标签闭合等语法
+                    </Text>
+                </Space>
+            ),
+            duration: 6,
+            style: { marginTop: '20px' },
+        });
+    }, []);
+
+    // 处理渲染
     const handleRenderNewWindow = useCallback(() => {
         const trimmedInput = inputValue.trim();
 
-        // 检测数据类型
-        let dataType: 'json' | 'xml' = 'json';
-        let dataStr = trimmedInput;
-
-        // 检查是否为 XML
-        if (trimmedInput.startsWith('<') && trimmedInput.endsWith('>')) {
-            dataType = 'xml';
+        if (!trimmedInput) {
+            message.warning({
+                content: '请先粘贴 JSON 或 XML 内容',
+                icon: <InfoCircleOutlined />,
+            });
+            return;
         }
+
+        let dataType: 'json' | 'xml' = detectedType || 'json';
+
+        if (!detectedType) {
+            try {
+                JSON.parse(trimmedInput);
+                dataType = 'json';
+            } catch {
+                dataType = 'xml';
+            }
+        }
+
+        setIsParsing(true);
 
         try {
             if (dataType === 'json') {
-                JSON.parse(trimmedInput); // 验证 JSON
+                JSON.parse(trimmedInput);
+                message.success({
+                    content: (
+                        <Space>
+                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                            <Text>JSON 格式验证通过！正在打开查看器...</Text>
+                        </Space>
+                    ),
+                    duration: 2,
+                });
             } else {
-                // 验证 XML
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
                 const parserError = xmlDoc.querySelector('parsererror');
                 if (parserError) {
-                    throw new Error(parserError.textContent || 'XML 解析错误');
+                    throw new Error(parserError.textContent || 'XML 格式错误');
                 }
+                message.success({
+                    content: (
+                        <Space>
+                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
+                            <Text>XML 格式验证通过！正在打开查看器...</Text>
+                        </Space>
+                    ),
+                    duration: 2,
+                });
             }
 
-            // 使用 Chrome 扩展 API 创建新标签页
-            chrome.tabs.create({
-                url: chrome.runtime.getURL(`tabs/viewer.html?${dataType}=${encodeURIComponent(dataStr)}&path=${encodeURIComponent('$')}`)
-            });
+            setTimeout(() => {
+                chrome.tabs.create({
+                    url: chrome.runtime.getURL(`tabs/viewer.html?${dataType}=${encodeURIComponent(trimmedInput)}&path=${encodeURIComponent('$')}`)
+                });
+                setIsParsing(false);
+            }, 500);
+
         } catch (e) {
-            alert(`${dataType.toUpperCase()}解析错误: ` + (e as Error).message);
+            setIsParsing(false);
+            showParseError(dataType, (e as Error).message);
+        }
+    }, [inputValue, detectedType, showParseError]);
+
+    const handleClear = useCallback(() => {
+        setInputValue('');
+        message.info({
+            content: '内容已清空',
+            icon: <InfoCircleOutlined />,
+            duration: 1.5,
+        });
+    }, []);
+
+    const handleCopy = useCallback(async () => {
+        if (!inputValue) {
+            message.warning('没有可复制的内容');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(inputValue);
+            message.success({
+                content: '已复制到剪贴板！',
+                duration: 1.5,
+                icon: <CheckCircleOutlined />,
+            });
+        } catch (err) {
+            const textarea = document.createElement('textarea');
+            textarea.value = inputValue;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            message.success({
+                content: '已复制到剪贴板！',
+                duration: 1.5,
+                icon: <CheckCircleOutlined />,
+            });
         }
     }, [inputValue]);
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && inputValue) {
+                e.preventDefault();
+                handleRenderNewWindow();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+                e.preventDefault();
+                handleClear();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [handleRenderNewWindow, handleClear, inputValue]);
+
+    const charCount = inputValue.length;
+    const isValidLength = charCount > 0 && charCount < 50000;
 
     return (
-        <div>
-            <h3>输入 JSON(支持内嵌XML) 或XML(支持内嵌JSON)</h3>
-            <textarea
-                id="input"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="粘贴 JSON or XML 字符串…"
-            />
-            <div style={{display: 'flex', gap: '8px', marginTop: '8px'}}>
-                <button
-                    id="render"
-                    onClick={handleRender}
-                    style={{display: treeData ? 'inline-block' : 'none'}}
-                >
-                    渲染
-                </button>
-                <button id="renderNewWindow" onClick={handleRenderNewWindow}>
-                    渲染(窗口)
-                </button>
-            </div>
+        <div className="popup-container">
+            <Card
+                title={
+                    <Space align="center">
+                        <CodeOutlined style={{ color: '#1677ff' }} />
+                        <Text strong style={{ fontSize: '16px' }}>嵌套数据查看器</Text>
+                    </Space>
+                }
+                extra={        // ✅ 位于此处的 extra 属性已修复
+                    detectedType && (
+                        <Tag
+                            icon={detectedType === 'json' ? <CodeOutlined /> : <FileTextOutlined />}
+                            color={detectedType === 'json' ? 'blue' : 'green'}
+                            style={{ fontSize: '12px' }}
+                        >
+                            {detectedType.toUpperCase()}
+                        </Tag>
+                    )
+                }
+                variant="borderless"
+                style={{ width: '100%' }}
+                styles={{
+                    body: { padding: '16px', paddingBottom: '12px' },
+                    header: { padding: '12px 16px' }
+                }}
+            >
+                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                    <div>
+                        <Text type="secondary" style={{ fontSize: '12px', marginBottom: '8px', display: 'block' }}>
+                            支持 JSON（可内嵌 XML）或 XML（可内嵌 JSON）
+                        </Text>
 
-            {error && (
-                <div id="tree">❌ {error}</div>
-            )}
+                        <TextArea
+                            id="input"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder={`{
+  "name": "示例数据",
+  "nestedXML": "<user><name>张三</name></user>",
+  "array": [1, 2, 3]
+}
 
+或
+
+<root>
+  <jsonData>{"key": "value"}</jsonData>
+</root>`}
+                            autoSize={{ minRows: 8, maxRows: 15 }}
+                            showCount
+                            maxLength={100000}
+                            status={!isValidLength && inputValue ? 'error' : detectedType ? 'warning' : ''}
+                            disabled={isParsing}
+                            style={{ fontFamily: 'Monaco, Menlo, Consolas, monospace', fontSize: '13px' }}
+                        />
+                    </div>
+
+                    <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
+                        <Space wrap>
+                            <Button
+                                type="primary"
+                                icon={<EyeOutlined />}
+                                onClick={handleRenderNewWindow}
+                                disabled={!isValidLength || isParsing}
+                                loading={isParsing}
+                                size="middle"
+                                style={{ minWidth: '110px' }}
+                            >
+                                渲染
+                            </Button>
+
+                            <Button
+                                icon={<CopyOutlined />}
+                                onClick={handleCopy}
+                                disabled={!inputValue || isParsing}
+                                size="middle"
+                                style={{ minWidth: '90px' }}
+                            >
+                                复制
+                            </Button>
+
+                            <Button
+                                danger
+                                icon={<ClearOutlined />}
+                                onClick={handleClear}
+                                disabled={!inputValue || isParsing}
+                                size="middle"
+                                style={{ minWidth: '90px' }}
+                            >
+                                清空
+                            </Button>
+                        </Space>
+
+                        {charCount > 0 && (
+                            <Text type="secondary" style={{ fontSize: '12px' }}>
+                                {charCount.toLocaleString()} 字符
+                            </Text>
+                        )}
+                    </Space>
+
+                    <div style={{
+                        fontSize: '11px',
+                        color: '#8c8c8c',
+                        textAlign: 'right',
+                        borderTop: '1px solid #f0f0f0',
+                        paddingTop: '8px',
+                        marginTop: '4px'
+                    }}>
+                        <Space size="small">
+                            <InfoCircleOutlined />
+                            <Text type="secondary">快捷键: Ctrl+Enter 渲染 | Ctrl+L 清空</Text>
+                        </Space>
+                    </div>
+                </Space>
+            </Card>
         </div>
     );
 };

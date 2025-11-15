@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { ViewComponentProps } from '../types';
-import { lastKey } from '../../utils';
-import { copyPresets, useCopy } from '../../hooks';
-import { InlineImagePreview } from '../../components/InlineImagePreview';
+import React, {useState} from 'react';
+import {ViewComponentProps} from '../types';
+import {lastKey} from '../../utils';
+import {copyPresets, useCopy} from '../../hooks';
+import {InlineImagePreview} from '../../components/InlineImagePreview';
 
 /**
  * Base64 图片视图组件
  * 支持层级显示、展开收缩和嵌入式图片预览
  */
 export const Base64ImageView: React.FC<ViewComponentProps> = ({
-    data,
-    path,
-    depth
-}) => {
+                                                                  data,
+                                                                  path,
+                                                                  depth
+                                                              }) => {
     const [isExpanded, setIsExpanded] = useState(true);
 
     if (typeof data !== 'string') {
@@ -32,23 +32,23 @@ export const Base64ImageView: React.FC<ViewComponentProps> = ({
     };
 
     // 使用统一的复制功能Hook - 确保复制完整的原始字符串并保留转义字符
-    const { handleCopy } = useCopy(copyPresets.base64(data));
+    const {handleCopy} = useCopy(copyPresets.base64(data));
 
     return (
         <div className="node" data-depth={depth}>
-            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <div style={{display: 'flex', alignItems: 'flex-start'}}>
                 {/* 图片标题区域 */}
                 <div className="key-container expandable-key" onClick={toggleExpand}>
                     <span className="expand-btn">{isExpanded ? '▼' : '▶'}</span>
                     <span className="key">
                         {path === '$' ? '' : keyName + ': '}
-                        <span style={{ color: '#7c3aed', fontWeight: 'bold' }}>
+                        <span style={{color: '#7c3aed', fontWeight: 'bold'}}>
                             {imageType.toUpperCase()}
                         </span>
-                        <span style={{ color: '#6b7280', fontSize: '11px', marginLeft: '4px' }}>
+                        <span style={{color: '#6b7280', fontSize: '11px', marginLeft: '4px'}}>
                             ({fileSizeKB}KB)
                         </span>
-                        <span style={{ color: '#6b7280', marginLeft: '8px' }}>:</span>
+                        <span style={{color: '#6b7280', marginLeft: '8px'}}>:</span>
                     </span>
                 </div>
 
@@ -80,7 +80,7 @@ export const Base64ImageView: React.FC<ViewComponentProps> = ({
             {isExpanded && (
                 <div className="children-wrapper">
                     {/* 图片预览 */}
-                    <div style={{ marginBottom: '12px' }}>
+                    <div style={{marginBottom: '12px'}}>
                         <InlineImagePreview
                             base64Data={cleanBase64}
                             imageType={imageType}

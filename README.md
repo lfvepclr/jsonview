@@ -158,23 +158,17 @@ nested-json-viewer/
 
 2. **安装依赖**
    ```bash
-   npm install
-   # 或使用 yarn
-   yarn install
+   pnpm install
    ```
 
 3. **开发环境启动**
    ```bash
-   npm run dev
-   # 或使用 yarn
-   yarn dev
+   pnpm run dev
    ```
 
 4. **构建生产版本**
    ```bash
-   npm run build
-   # 或使用 yarn
-   yarn build
+   pnpm run build
    ```
 
 ---

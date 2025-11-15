@@ -25,9 +25,9 @@ const renderXmlNode = (
 
         // 获取所有属性
         const attributes = Array.from(element.attributes).map((attr, index) => (
-            <span key={index} className="xml-attribute" style={{color: '#d73a49'}}>
-        {' '}{attr.name}="{attr.value}"
-      </span>
+            <span key={index} className="xml-attribute" style={{color: '#b76b01'}}>
+                {' '}{attr.name}="{attr.value}"
+            </span>
         ));
 
         // 获取子节点（只包含元素节点）

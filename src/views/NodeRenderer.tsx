@@ -1,6 +1,5 @@
 import React from 'react';
-import {JSONValue} from '../types';
-import {TypeDetector} from './types';
+import {JSONValue, TypeDetector} from './types';
 import {
     ArrayView,
     Base64ImageView,

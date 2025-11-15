@@ -398,3 +398,12 @@ textarea {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+.xml-attribute {
+    margin-left: 0.25em;  /* 属性间间距 */
+}
+
+.xml-attribute::after {
+    content: " ";  /* 等号后添加视觉空格 */
+    white-space: pre;  /* 防止空格被压缩 */
+}

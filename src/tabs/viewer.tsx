@@ -9,15 +9,16 @@
  *
  * @component
  */
+import '@ant-design/v5-patch-for-react-19';
 import React, {useCallback, useEffect, useState} from 'react';
 import {ToastContainer} from 'react-toastify';
+import "antd/dist/reset.css";
 import 'react-toastify/dist/ReactToastify.css';
-import {RenderNode} from '../core/NodeRenderer';
-import {getMaxValueLength} from '../utils/helperUtils';
+import {JSONValue, RenderNode} from '../views';
+import {getMaxValueLength} from '../utils';
 import '../../styles.css';
-import {JSONValue} from '../types';
 
-import { pdfjs } from 'react-pdf';
+import {pdfjs} from 'react-pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -200,7 +201,6 @@ const Viewer: React.FC = () => {
                             data={treeData}
                             path={parentPath}
                             depth={0}
-                            defaultExpand={true}
                             onExpand={handleExpand}
                         />
                     </div>

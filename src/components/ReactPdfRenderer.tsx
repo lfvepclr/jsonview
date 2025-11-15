@@ -26,7 +26,6 @@ const ReactPdfRenderer: React.FC<ReactPdfRendererProps> = ({
     const [scale, setScale] = useState(1.0);
 
 
-
     // 清理base64数据，确保格式正确
     const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, '');
     const dataUrl = `data:application/pdf;base64,${cleanBase64}`;
@@ -109,7 +108,7 @@ const ReactPdfRenderer: React.FC<ReactPdfRendererProps> = ({
     }
 
     return (
-        <div >
+        <div>
             {showControls && (
                 <div style={{
                     padding: '8px',

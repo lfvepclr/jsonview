@@ -1,5 +1,3 @@
-import {JSONValue} from '../../types';
-
 /**
  * 节点类型枚举
  * 支持所有已知的数据类型
@@ -25,6 +23,40 @@ export type CompositeType = 'json' | 'xml' | 'array' | 'object';
 export type SimpleType = 'image' | 'url' | 'base64-image' | 'base64-pdf' | 'string' | 'number' | 'boolean' | 'null';
 
 /**
+ * 应用程序的类型定义
+ */
+
+/**
+ * JSON 值类型
+ *
+ * 表示任何有效的 JSON 值
+ */
+export type JSONValue =
+    | string
+    | number
+    | boolean
+    | null
+    | JSONObject
+    | JSONArray;
+
+/**
+ * JSON 对象类型
+ *
+ * 表示一个键值对对象，值可以是任何 JSON 值
+ */
+export interface JSONObject {
+    [key: string]: JSONValue;
+}
+
+/**
+ * JSON 数组类型
+ *
+ * 表示一个 JSON 值的数组
+ */
+export interface JSONArray extends Array<JSONValue> {
+}
+
+/**
  * 视图组件基础接口
  * 所有类型视图组件都应该实现此接口
  */
@@ -46,25 +78,4 @@ export interface ViewComponentProps {
  */
 export interface TypeDetector {
     (data: any): NodeType;
-}
-
-/**
- * 视图组件注册表接口
- */
-export interface ViewRegistry {
-    [key: string]: React.ComponentType<ViewComponentProps>;
-}
-
-/**
- * 渲染配置接口
- */
-export interface RenderConfig {
-    /** 最大渲染深度，防止无限递归 */
-    maxDepth?: number;
-    /** 是否默认展开容器节点 */
-    defaultExpand?: boolean;
-    /** 自定义类型检测器 */
-    customDetectors?: TypeDetector[];
-    /** 自定义视图组件 */
-    customViews?: ViewRegistry;
 }

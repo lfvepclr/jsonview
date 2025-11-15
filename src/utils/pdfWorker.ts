@@ -1,4 +1,4 @@
-import { pdfjs } from 'react-pdf';
+import {pdfjs} from 'react-pdf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -6,4 +6,4 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 // 导出pdfjs以供其他组件使用
-export { pdfjs };
+export {pdfjs};
