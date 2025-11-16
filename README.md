@@ -98,39 +98,35 @@
 ```
 nested-json-viewer/
 ├── src/
-│   ├── components/          # 可复用组件
+│   ├── components/                  # 可复用组件
 │   │   ├── ImagePreviewModal.tsx    # 图片预览弹窗
 │   │   ├── InlineImagePreview.tsx   # 内联图片预览
 │   │   ├── InlinePdfPreview.tsx     # 内联PDF预览
 │   │   ├── PdfPreviewModal.tsx      # PDF预览弹窗
 │   │   ├── ReactPdfRenderer.tsx     # PDF渲染器
 │   │   └── URLActionButton.tsx      # URL操作按钮
-│   ├── context/             # React Context
-│   │   └── ExpandContext.tsx        # 展开状态管理
-│   ├── core/               # 核心渲染逻辑
+│   ├── context/                     # React Context
+│   ├── views/                       # 核心渲染逻辑
 │   │   ├── NodeRenderer.tsx         # 节点渲染器
 │   │   ├── types/                   # 类型检测器
+│   │   │   ├── TypeDetector.ts      # 类型检测器
+│   │   │   ├── ViewTypes.ts         # 视图类型
 │   │   ├── views/                   # 子视图渲染器
+│   │   │   ├── ArrayView.tsx        # 数组视图
+│   │   │   ├── Base64ImageView.tsx  # Base64图片视图
+│   │   │   ├── Base64PdfView.tsx    # Base64PDF视图
+│   │   │   ├── ImageView.tsx        # 图片视图
+│   │   │   ├── JsonView.tsx         # JSON视图
+│   │   │   ├── ObjectView.tsx       # 对象视图
+│   │   │   ├── PrimitiveView.tsx    # 基础类型视图
+│   │   │   ├── UrlView.tsx          # URL视图
+│   │   │   ├── XmlView.tsx          # XML视图
 │   │   └── index.ts                 # 核心导出
 │   ├── hooks/              # 自定义Hooks
-│   │   ├── useCopy.ts               # 复制功能
-│   │   ├── useExpand.ts             # 展开/收起
-│   │   └── useFloatData.ts          # 浮层数据
 │   ├── tabs/               # 标签页组件
-│   │   └── viewer.tsx               # 主查看器
-│   ├── types/              # TypeScript类型定义
-│   │   ├── base64Types.ts           # Base64相关类型
-│   │   ├── jsonTypes.ts             # JSON相关类型
-│   │   ├── uiTypes.ts               # UI相关类型
-│   │   └── index.ts                 # 类型导出
+│   │   └── viewer.tsx      # 主查看器
 │   ├── utils/              # 工具函数
-│   │   ├── domUtils.ts              # DOM操作
-│   │   ├── fileNameGenerator.ts     # 文件名生成
-│   │   ├── helperUtils.ts           # 辅助函数
-│   │   ├── jsonDetectionConfig.ts   # JSON检测配置
-│   │   └── pdfWorker.ts             # PDF工作线程
 │   ├── styles/             # 样式文件
-│   │   └── animations.css           # 动画效果
 │   ├── popup.tsx           # 弹出窗口
 │   └── index.ts            # 入口文件
 ├── package.json            # 项目配置
@@ -224,7 +220,7 @@ nested-json-viewer/
 在 `src/core/views/` 目录下创建 `PrimitiveView.tsx`：
 
 ```typescript
-// src/core/views/PrimitiveView.tsx
+// src/views/views/PrimitiveView.tsx
 import React from 'react';
 import {ViewComponentProps} from '../types';
 import {classOf, lastKey} from '../../utils';
@@ -287,7 +283,7 @@ export default PrimitiveView;
 
 #### 步骤2：注册SubView类型
 
-在 `src/core/NodeRenderer.tsx` 中添加新的类型检测和渲染：
+在 `src/views/NodeRenderer.tsx` 中添加新的类型检测和渲染：
 
 ```typescript
 // 在 NodeRenderer 中添加新的case
@@ -308,7 +304,7 @@ switch (nodeType) {
 
 #### 步骤3：添加类型检测器
 
-在 `src/core/types/TypeDetector.ts` 中添加新的类型检测：
+在 `src/views/types/TypeDetector.ts` 中添加新的类型检测：
 
 ```typescript
 // 在 TypeDetector 中添加新的类型检测
