@@ -55,11 +55,11 @@ const renderXmlNode = (
             <div className="xml-element" style={{marginLeft: '16px', marginTop: '4px'}}>
                 {/* 开始标签 */}
                 <div style={{display: 'inline-flex', flexWrap: 'wrap', alignItems: 'baseline'}}>
-          <span className="xml-tag" style={{color: '#22863a'}}>
+          <span className="xml-tag">
             &lt;{element.nodeName}
           </span>
                     {attributes}
-                    <span className="xml-tag" style={{color: '#22863a'}}>
+                    <span className="xml-tag" >
             {isSelfClosing ? ' />' : '>'}
           </span>
 
@@ -73,7 +73,7 @@ const renderXmlNode = (
                     renderChild(directTextContent, `${basePath}#xml-content#${element.nodeName}`, baseDepth + 1)
                 )}
               </span>
-                            <span className="xml-tag" style={{color: '#22863a'}}>
+                            <span className="xml-tag" >
                 &lt;/{element.nodeName}&gt;
               </span>
                         </>
@@ -107,7 +107,7 @@ const renderXmlNode = (
 
                         {/* 结束标签 */}
                         <div style={{display: 'flex'}}>
-              <span className="xml-tag" style={{color: '#22863a'}}>
+              <span className="xml-tag" >
                 &lt;/{element.nodeName}&gt;
               </span>
                         </div>

@@ -24,8 +24,6 @@ export const classOf = (v: any): string => {
     }
 };
 
-// JSON检测结果缓存，避免重复检测相同字符串
-const jsonDetectionCache = new Map<string, boolean>();
 
 // JSON检测配置
 const JSON_DETECTION_CONFIG = {
@@ -78,24 +76,12 @@ const JSON_DETECTION_CONFIG = {
  * @see {@link fallbackValidation} 容错检测
  */
 export const looksLikeJSON = (str: string): boolean => {
-    // 基本类型检查
-    if (typeof str !== 'string') return false;
-
-    const trimmed = str.trim();
-    if (!trimmed) return false;
-
-    // 检查缓存
-    const cached = getCachedResult(trimmed);
-    if (cached !== undefined) return cached;
-
-    // 执行检测策略
-    const result = quickFormatCheck(trimmed) &&
-        (parseValidation(trimmed) ||
-            (JSON_DETECTION_CONFIG.enableFallback && fallbackValidation(trimmed)));
-
-    // 缓存结果
-    setCachedResult(trimmed, result);
-    return result;
+    try {
+        const obj = JSON.parse(str)
+        return typeof obj === "object"
+    } catch (e) {
+        return false
+    }
 };
 
 /**
@@ -286,30 +272,6 @@ function preprocessComplexJson(str: string): string {
     return processed;
 }
 
-/**
- * 获取缓存结果
- */
-function getCachedResult(str: string): boolean | undefined {
-    if (!JSON_DETECTION_CONFIG.enableCache) return undefined;
-    return jsonDetectionCache.get(str);
-}
-
-/**
- * 设置缓存结果
- */
-function setCachedResult(str: string, result: boolean): void {
-    if (!JSON_DETECTION_CONFIG.enableCache) return;
-
-    // 限制缓存大小，使用LRU策略
-    if (jsonDetectionCache.size >= JSON_DETECTION_CONFIG.maxCacheSize) {
-        const firstKey = jsonDetectionCache.keys().next().value;
-        if (firstKey !== undefined) {
-            jsonDetectionCache.delete(firstKey);
-        }
-    }
-
-    jsonDetectionCache.set(str, result);
-}
 
 /**
  * 检查字符串是否看起来像 XML

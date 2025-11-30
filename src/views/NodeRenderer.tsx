@@ -57,6 +57,9 @@ const NodeRenderer: React.FC<NodeRendererProps> = ({
 
     // 检测数据类型
     const nodeType = TypeDetector.detectNodeType(data);
+    let strDat = data ? data.toString() : '';
+    strDat = strDat.length > 100 ? strDat.slice(0, 100) + '...' : strDat;
+    console.log(`层级:${depth}, 节点类型:${nodeType}, 数据类型:${typeof data}, 数据:${strDat}`);
 
     // 构建视图组件的通用属性
     const viewProps = {

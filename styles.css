@@ -358,6 +358,11 @@ textarea {
 }
 
 /* XML文本内容样式 */
+.xml-tag{
+    color: #881391;
+    font-weight: 600;
+    margin-right: 4px;
+}
 .xml-text {
     color: #0b7500;
     font-family: monospace;
