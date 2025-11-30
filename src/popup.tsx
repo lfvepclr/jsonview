@@ -1,6 +1,5 @@
-import '@ant-design/v5-patch-for-react-19';
-import React, { useCallback, useState, useEffect } from 'react';
-import { Button, Input, Space, Card, Tag, Typography, message } from 'antd';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { Button, Input, Space, Card, Tag, Typography } from 'antd';
 import {
     EyeOutlined,
     ClearOutlined,
@@ -21,15 +20,137 @@ const Popup: React.FC = () => {
     const [inputValue, setInputValue] = useState('');
     const [detectedType, setDetectedType] = useState<'json' | 'xml' | null>(null);
     const [isParsing, setIsParsing] = useState(false);
+    const inputRef = useRef<any>(null);
 
-    // 智能检测数据类型
-    useEffect(() => {
-        const trimmed = inputValue.trim();
+    // 提示状态管理
+    const [notification, setNotification] = useState<{
+        type: 'success' | 'error' | 'warning' | 'info';
+        message: string;
+        visible: boolean;
+    }>({ type: 'info', message: '', visible: false });
+
+    // 验证JSON格式并返回验证结果
+    const validateJson = useCallback((value: string): { isValid: boolean; error?: string } => {
+        try {
+            JSON.parse(value);
+            return { isValid: true };
+        } catch (e) {
+            return { isValid: false, error: (e as Error).message };
+        }
+    }, []);
+
+    // 验证XML格式并返回验证结果
+    const validateXml = useCallback((value: string): { isValid: boolean; error?: string } => {
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(value, "text/xml");
+            const parserError = xmlDoc.querySelector('parsererror');
+            if (parserError) {
+                return { isValid: false, error: parserError.textContent || 'XML 格式错误' };
+            }
+            return { isValid: true };
+        } catch (e) {
+            return { isValid: false, error: (e as Error).message };
+        }
+    }, []);
+    // 防抖处理的数据类型检测和格式验证
+    const detectDataType = useCallback((value: string) => {
+        const trimmed = value.trim();
         if (!trimmed) {
             setDetectedType(null);
+            setIsDetecting(false);
+            // 清空输入时隐藏提示
+            setNotification(prev => ({ ...prev, visible: false }));
             return;
         }
 
+        setIsDetecting(true);
+
+        let detectedDataType: 'json' | 'xml' | null = null;
+
+        // 检测数据类型
+        if (trimmed.startsWith('<') && trimmed.includes('>')) {
+            detectedDataType = 'xml';
+        } else if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+            (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+            detectedDataType = 'json';
+        }
+
+        setDetectedType(detectedDataType);
+
+        // 如果检测到数据类型，进行格式验证
+        if (detectedDataType) {
+            let validationResult: { isValid: boolean; error?: string };
+
+            if (detectedDataType === 'json') {
+                validationResult = validateJson(trimmed);
+            } else {
+                validationResult = validateXml(trimmed);
+            }
+
+            setIsDetecting(false);
+
+            // 显示验证结果提示
+            if (validationResult.isValid) {
+                setNotification({
+                    type: 'success',
+                    message: `${detectedDataType.toUpperCase()} 格式正确 ✓`,
+                    visible: true
+                });
+                // 成功提示2秒后自动隐藏
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, visible: false }));
+                }, 2000);
+            } else {
+                setNotification({
+                    type: 'error',
+                    message: `${detectedDataType.toUpperCase()} 格式错误 ✗`,
+                    visible: true
+                });
+                // 错误提示3秒后自动隐藏
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, visible: false }));
+                }, 3000);
+            }
+        } else if (trimmed.length > 0) {
+            setIsDetecting(false);
+            // 非JSON/XML格式内容，提供明确提示
+            setNotification({
+                type: 'warning',
+                message: '检测到文本内容，但格式不是标准JSON或XML ⚠',
+                visible: true
+            });
+            // 警告提示2秒后自动隐藏
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, visible: false }));
+            }, 2000);
+        } else {
+            setIsDetecting(false);
+        }
+    }, [validateJson, validateXml]);
+
+    // 防抖处理的数据类型检测
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [isDetecting, setIsDetecting] = useState(false);
+
+    const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // 清除之前的定时器
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // 立即进行快速类型检测（不进行格式验证，避免频繁验证）
+        const trimmed = value.trim();
+        if (!trimmed) {
+            setDetectedType(null);
+            setNotification(prev => ({ ...prev, visible: false }));
+            return;
+        }
+
+        // 快速类型检测
         if (trimmed.startsWith('<') && trimmed.includes('>')) {
             setDetectedType('xml');
         } else if ((trimmed.startsWith('{') && trimmed.endsWith('}')) ||
@@ -38,40 +159,30 @@ const Popup: React.FC = () => {
         } else {
             setDetectedType(null);
         }
-    }, [inputValue]);
 
-    // 显示格式化错误
-    const showParseError = useCallback((type: 'json' | 'xml', errorMsg: string) => {
-        message.open({
-            type: 'error',
-            content: (
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                    <Space>
-                        <CloseCircleOutlined style={{ color: '#ff4d4f' }} />
-                        <Text strong>{type.toUpperCase()} 解析错误</Text>
-                    </Space>
-                    <Text type="secondary" style={{ fontSize: '12px', display: 'block' }}>
-                        {errorMsg}
-                    </Text>
-                    <Text type="secondary" style={{ fontSize: '11px' }}>
-                        提示：检查括号匹配、引号、标签闭合等语法
-                    </Text>
-                </Space>
-            ),
-            duration: 6,
-            style: { marginTop: '20px' },
-        });
-    }, []);
+        // 设置防抖定时器，300ms后进行完整的格式验证
+        debounceTimerRef.current = setTimeout(() => {
+            detectDataType(value);
+        }, 300);
+    }, [detectDataType]);
+
+
 
     // 处理渲染
     const handleRenderNewWindow = useCallback(() => {
         const trimmedInput = inputValue.trim();
 
         if (!trimmedInput) {
-            message.warning({
-                content: '请先粘贴 JSON 或 XML 内容',
-                icon: <InfoCircleOutlined />,
+            setNotification({
+                type: 'warning',
+                message: '请先粘贴 JSON 或 XML 内容',
+                visible: true
             });
+
+            // 2秒后自动隐藏警告提示
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, visible: false }));
+            }, 2000);
             return;
         }
 
@@ -91,15 +202,16 @@ const Popup: React.FC = () => {
         try {
             if (dataType === 'json') {
                 JSON.parse(trimmedInput);
-                message.success({
-                    content: (
-                        <Space>
-                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                            <Text>JSON 格式验证通过！正在打开查看器...</Text>
-                        </Space>
-                    ),
-                    duration: 2,
+                setNotification({
+                    type: 'success',
+                    message: 'JSON 格式验证通过！正在打开查看器...',
+                    visible: true
                 });
+
+                // 2秒后自动隐藏成功提示
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, visible: false }));
+                }, 2000);
             } else {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(trimmedInput, "text/xml");
@@ -107,50 +219,72 @@ const Popup: React.FC = () => {
                 if (parserError) {
                     throw new Error(parserError.textContent || 'XML 格式错误');
                 }
-                message.success({
-                    content: (
-                        <Space>
-                            <CheckCircleOutlined style={{ color: '#52c41a' }} />
-                            <Text>XML 格式验证通过！正在打开查看器...</Text>
-                        </Space>
-                    ),
-                    duration: 2,
+                setNotification({
+                    type: 'success',
+                    message: 'XML 格式验证通过！正在打开查看器...',
+                    visible: true
                 });
+
+                // 2秒后自动隐藏成功提示
+                setTimeout(() => {
+                    setNotification(prev => ({ ...prev, visible: false }));
+                }, 2000);
             }
 
-            setTimeout(() => {
-                chrome.tabs.create({
-                    url: chrome.runtime.getURL(`tabs/viewer.html?${dataType}=${encodeURIComponent(trimmedInput)}&path=${encodeURIComponent('$')}`)
-                });
-                setIsParsing(false);
-            }, 500);
+            chrome.tabs.create({
+                url: chrome.runtime.getURL(`tabs/viewer.html?${dataType}=${encodeURIComponent(trimmedInput)}&path=${encodeURIComponent('$')}`)
+            });
+            setIsParsing(false);
 
         } catch (e) {
             setIsParsing(false);
-            showParseError(dataType, (e as Error).message);
+            setNotification({
+                type: 'error',
+                message: `${dataType.toUpperCase()} 解析错误: ${(e as Error).message}`,
+                visible: true
+            });
+
+            // 3秒后自动隐藏错误提示
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, visible: false }));
+            }, 3000);
         }
-    }, [inputValue, detectedType, showParseError]);
+    }, [inputValue, detectedType]);
 
     const handleClear = useCallback(() => {
         setInputValue('');
-        message.info({
-            content: '内容已清空',
-            icon: <InfoCircleOutlined />,
-            duration: 1.5,
+        setNotification({
+            type: 'info',
+            message: '内容已清空',
+            visible: true
         });
+
+        // 1.5秒后自动隐藏信息提示
+        setTimeout(() => {
+            setNotification(prev => ({ ...prev, visible: false }));
+        }, 1500);
     }, []);
 
     const handleCopy = useCallback(async () => {
         if (!inputValue) {
-            message.warning('没有可复制的内容');
+            setNotification({
+                type: 'warning',
+                message: '没有可复制的内容',
+                visible: true
+            });
+
+            // 2秒后自动隐藏警告提示
+            setTimeout(() => {
+                setNotification(prev => ({ ...prev, visible: false }));
+            }, 2000);
             return;
         }
         try {
             await navigator.clipboard.writeText(inputValue);
-            message.success({
-                content: '已复制到剪贴板！',
-                duration: 1.5,
-                icon: <CheckCircleOutlined />,
+            setNotification({
+                type: 'success',
+                message: '已复制到剪贴板！',
+                visible: true
             });
         } catch (err) {
             const textarea = document.createElement('textarea');
@@ -159,10 +293,10 @@ const Popup: React.FC = () => {
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-            message.success({
-                content: '已复制到剪贴板！',
-                duration: 1.5,
-                icon: <CheckCircleOutlined />,
+            setNotification({
+                type: 'success',
+                message: '已复制到剪贴板！',
+                visible: true
             });
         }
     }, [inputValue]);
@@ -183,8 +317,17 @@ const Popup: React.FC = () => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [handleRenderNewWindow, handleClear, inputValue]);
 
+    // 自动聚焦到输入框
+    useEffect(() => {
+        // 使用setTimeout确保DOM完全渲染后再聚焦
+        setTimeout(() => {
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }, 100);
+    }, []);
+
     const charCount = inputValue.length;
-    const isValidLength = charCount > 0 && charCount < 50000;
 
     return (
         <div className="popup-container">
@@ -195,16 +338,23 @@ const Popup: React.FC = () => {
                         <Text strong style={{ fontSize: '16px' }}>嵌套数据查看器</Text>
                     </Space>
                 }
-                extra={        // ✅ 位于此处的 extra 属性已修复
-                    detectedType && (
-                        <Tag
-                            icon={detectedType === 'json' ? <CodeOutlined /> : <FileTextOutlined />}
-                            color={detectedType === 'json' ? 'blue' : 'green'}
-                            style={{ fontSize: '12px' }}
-                        >
-                            {detectedType.toUpperCase()}
-                        </Tag>
-                    )
+                extra={
+                    <Space size="small">
+                        {isDetecting && (
+                            <Tag color="processing" style={{ fontSize: '12px' }}>
+                                检测中...
+                            </Tag>
+                        )}
+                        {detectedType && !isDetecting && (
+                            <Tag
+                                icon={detectedType === 'json' ? <CodeOutlined /> : <FileTextOutlined />}
+                                color={detectedType === 'json' ? 'blue' : 'green'}
+                                style={{ fontSize: '12px' }}
+                            >
+                                {detectedType.toUpperCase()}
+                            </Tag>
+                        )}
+                    </Space>
                 }
                 variant="borderless"
                 style={{ width: '100%' }}
@@ -213,7 +363,7 @@ const Popup: React.FC = () => {
                     header: { padding: '12px 16px' }
                 }}
             >
-                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <Space orientation="vertical" size="middle" style={{ width: '100%' }}>
                     <div>
                         <Text type="secondary" style={{ fontSize: '12px', marginBottom: '8px', display: 'block' }}>
                             支持 JSON（可内嵌 XML）或 XML（可内嵌 JSON）
@@ -221,8 +371,9 @@ const Popup: React.FC = () => {
 
                         <TextArea
                             id="input"
+                            ref={inputRef}
                             value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
+                            onChange={handleInputChange}
                             placeholder={`{
   "name": "示例数据",
   "nestedXML": "<user><name>张三</name></user>",
@@ -236,8 +387,8 @@ const Popup: React.FC = () => {
 </root>`}
                             autoSize={{ minRows: 8, maxRows: 15 }}
                             showCount
-                            maxLength={100000}
-                            status={!isValidLength && inputValue ? 'error' : detectedType ? 'warning' : ''}
+
+                            status={detectedType ? 'warning' : ''}
                             disabled={isParsing}
                             style={{ fontFamily: 'Monaco, Menlo, Consolas, monospace', fontSize: '13px' }}
                         />
@@ -249,7 +400,7 @@ const Popup: React.FC = () => {
                                 type="primary"
                                 icon={<EyeOutlined />}
                                 onClick={handleRenderNewWindow}
-                                disabled={!isValidLength || isParsing}
+                                disabled={!inputValue || isParsing}
                                 loading={isParsing}
                                 size="middle"
                                 style={{ minWidth: '110px' }}
@@ -301,6 +452,45 @@ const Popup: React.FC = () => {
                     </div>
                 </Space>
             </Card>
+
+            {/* 提示显示区域 */}
+            {notification.visible && (
+                <div
+                    style={{
+                        marginTop: '8px',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontFamily: 'Monaco, Menlo, Consolas, monospace',
+                        backgroundColor: notification.type === 'error' ? '#fff2f0' :
+                                       notification.type === 'warning' ? '#fffbe6' :
+                                       notification.type === 'success' ? '#f6ffed' : '#e6f7ff',
+                        border: `1px solid ${
+                            notification.type === 'error' ? '#ffccc7' : 
+                            notification.type === 'warning' ? '#ffe58f' :
+                            notification.type === 'success' ? '#b7eb8f' : '#91d5ff'
+                        }`,
+                        color: notification.type === 'error' ? '#ff4d4f' :
+                               notification.type === 'warning' ? '#faad14' :
+                               notification.type === 'success' ? '#52c41a' : '#1677ff',
+                        animation: 'slideInUp 0.3s ease-out'
+                    }}
+                >
+                    <Space size="small" align="center">
+                        {notification.type === 'error' && <CloseCircleOutlined />}
+                        {notification.type === 'warning' && <InfoCircleOutlined />}
+                        {notification.type === 'success' && <CheckCircleOutlined />}
+                        {notification.type === 'info' && <InfoCircleOutlined />}
+                        <Text style={{
+                            color: 'inherit',
+                            fontSize: 'inherit',
+                            margin: 0
+                        }}>
+                            {notification.message}
+                        </Text>
+                    </Space>
+                </div>
+            )}
         </div>
     );
 };

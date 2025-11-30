@@ -9,7 +9,6 @@
  *
  * @component
  */
-import '@ant-design/v5-patch-for-react-19';
 import React, {useCallback, useEffect, useState} from 'react';
 import {ToastContainer} from 'react-toastify';
 import "antd/dist/reset.css";

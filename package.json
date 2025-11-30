@@ -11,11 +11,10 @@
     "package": "plasmo package"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.6.1",
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "@react-three/drei": "^9.117.3",
+    "@ant-design/icons": "^6.0.0",
+    "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
-    "antd": "^5.28.1",
+    "antd": "^6.0.0",
     "file-saver": "^2.0.5",
     "lucide-react": "^0.553.0",
     "pdfjs-dist": "4.8.69",
